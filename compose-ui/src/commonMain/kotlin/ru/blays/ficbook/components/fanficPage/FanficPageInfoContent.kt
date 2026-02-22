@@ -506,7 +506,7 @@ private fun CollectionsInfo(
                     .clip(MaterialTheme.shapes.small)
                     .background(MaterialTheme.colorScheme.primaryColorAtAlpha(0.2F))
                     .clickable(onClick = onClick)
-                    .padding(3.dp),
+                    .padding(4.dp, 3.dp),
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_stack),
@@ -787,6 +787,7 @@ private fun Pairings(
                             shape = shape
                         )
                         .clip(shape)
+                        .padding(4.dp, 3.dp)
                         .clickable {
                             onPairingClick(pairing)
                         }

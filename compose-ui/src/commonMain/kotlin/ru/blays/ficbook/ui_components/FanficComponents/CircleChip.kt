@@ -36,6 +36,7 @@ fun CircleChip(
                 minWidth = minSize
             )
             .clip(CircleShape)
+            .padding(4.dp, 0.dp)
             .then(modifier),
         content = content,
         verticalAlignment = Alignment.CenterVertically,
@@ -51,10 +52,11 @@ fun CircleChip(
 ) {
     Row(
         modifier = Modifier
-            .padding(4.dp)
+            .padding(2.dp)
             .background(color, CircleShape)
             .padding(3.dp)
             .clip(CircleShape)
+            .padding(4.dp, 0.dp)
             .then(modifier),
         content = content,
         verticalAlignment = Alignment.CenterVertically,
