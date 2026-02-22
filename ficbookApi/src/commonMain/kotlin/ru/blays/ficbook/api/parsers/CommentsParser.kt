@@ -17,17 +17,19 @@ internal class CommentListParser {
 
 class CommentParser {
     suspend fun parse(data: Element): CommentModel {
-        val commentID = data.select(
-            Evaluator.Class("mt-5 js quote btn btn-sm btn-link")
-        ).attr("data-comment_id")
+        val commentID = data.select("comment-reward-list")
+            .attr(":comment-id")
 
-        val avatarUrl = data.select(".comment-avatar img").attr(ATTR_SRC)
-        val (href, userName) = data.select(".author")
-            .select("a")
+        val avatarUrl = data.select(".avatar-cropper img").attr(ATTR_SRC)
+
+        val (href, userName) = data.select(
+            Evaluator.Class("comment-author")
+        )
+            .select("a.js-comment-author")
             .let { it.attr(ATTR_HREF) to it.text() }
 
         val isOwnComment = data.select(
-            Evaluator.Class("btn btn-link delete js_delete_comment")
+            Evaluator.Class("js_delete_comment")
         ).isNotEmpty()
 
         val likeButton = data.select("comment-like").first()
@@ -39,7 +41,7 @@ class CommentParser {
 
         val isLiked: Boolean = metadataModel?.liked ?: false
 
-        val likedBy: List<FanficAuthorModel> = metadataModel?.likeBadges?.map { badge ->
+        val likedBy: List<FanficAuthorModel> = metadataModel?.significantLikers?.map { badge ->
             FanficAuthorModel(
                 user = UserModel(
                     name = badge.username,
@@ -51,14 +53,16 @@ class CommentParser {
         } ?: emptyList()
 
         val commentMessage = data.select(
-            Evaluator.Class("comment_message urlize js-comment-message")
+            Evaluator.Class("comment-message urlize js-comment-message")
         ).first()
 
         val date = data.select("time").text()
 
-        val forFanfic: FanficShortcut? = data.select(".comment_link_to_fic")
+        val forFanfic: FanficShortcut? = data.select(
+            Evaluator.Class("comment-link-to-fanfic")
+        )
             .first()
-            ?.select("a[class=\"btn btn-link btn-sm px-0 word-break\"]")
+            ?.select("a.link-to-fanfic")
             ?.let {
                 FanficShortcut(
                     name = it.text(),
@@ -158,9 +162,9 @@ class CommentParser {
                 linesOnLevel.slice(
                     (userNameIndex + 1)..(linesOnLevel.lastIndex)
                 )
-                .joinToString("\n") {
-                    it.trim('>')
-                }
+                    .joinToString("\n") {
+                        it.trim('>')
+                    }
             }
         }
 

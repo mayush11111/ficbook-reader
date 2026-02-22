@@ -66,16 +66,36 @@ data class CommentMetadata(
     val dateCreate: String,
     @SerialName("fanfic_id")
     val fanficId: Int,
+    @SerialName("fanfic_slug")
+    val fanficSlug: String,
     @SerialName("id")
     val id: Int,
-    @SerialName("likeBadges")
-    val likeBadges: List<LikeBadge> = emptyList(),
+    @SerialName("significantLikers")
+    val significantLikers: List<LikeBadge> = emptyList(),
     @SerialName("like_cnt")
     val likeCnt: Int,
     @SerialName("liked")
     val liked: Boolean,
     @SerialName("part_id")
     val partId: Int,
+    @SerialName("user_id")
+    val userId: Int,
+    @SerialName("user_username")
+    val userUsername: String,
+    @SerialName("user_slug")
+    val userSlug: String,
+    @SerialName("user_avatar")
+    val userAvatar: String,
+    @SerialName("user_is_premium")
+    val userIsPremium: Boolean,
+    @SerialName("avatar_decoration_style")
+    val avatarDecorationStyle: String? = null,
+    @SerialName("free_rewards")
+    val freeRewards: Int = 0,
+    @SerialName("name")
+    val name: String? = null,
+    @SerialName("title")
+    val title: String? = null,
 ) {
     @Serializable
     data class LikeBadge(
@@ -84,7 +104,7 @@ data class CommentMetadata(
         @SerialName("id")
         val id: Int,
         @SerialName("type")
-        val type: String,
+        val type: String = "",
         @SerialName("username")
         val username: String
     )
