@@ -276,7 +276,7 @@ internal class FanficPageParser {
                 val sizeInfoParts = sizeElements.text().split(", ")
                 when (sizeInfoParts.size) {
                     3 -> {
-                        val rawString = sizeInfoParts[1]
+                        val rawString = sizeInfoParts[0]
                         return@run rawString.replace(
                             regex = notNumberRegex,
                             replacement = ""
