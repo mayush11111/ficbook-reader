@@ -229,22 +229,23 @@ fun FanficCard2(
                         )
                         .layoutId(LayoutIds.Background)
                 )
-                AsyncImage(
-                    model = fanfic.coverUrl,
-                    contentDescription = stringResource(Res.string.content_description_fanfic_cover),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .layoutId(LayoutIds.Cover)
-                        .clip(CardDefaults.shape)
-                )
+                if (fanfic.coverUrl.isNotEmpty())
+                    AsyncImage(
+                        model = fanfic.coverUrl,
+                        contentDescription = stringResource(Res.string.content_description_fanfic_cover),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .layoutId(LayoutIds.Cover)
+                            .clip(CardDefaults.shape)
+                    )
             } else {
-                AsyncImage(
-                    model = fanfic.coverUrl,
-                    contentDescription = stringResource(Res.string.content_description_fanfic_cover),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.layoutId(LayoutIds.Cover)
-
-                )
+                if (fanfic.coverUrl.isNotEmpty())
+                    AsyncImage(
+                        model = fanfic.coverUrl,
+                        contentDescription = stringResource(Res.string.content_description_fanfic_cover),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.layoutId(LayoutIds.Cover)
+                    )
                 Box(
                     modifier = Modifier
                         .background(
