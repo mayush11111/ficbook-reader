@@ -59,6 +59,7 @@ data class SearchParams(
         /**
         * Sort flags
         **/
+        const val SORT_BY_RELEVANCE = 0
         const val SORT_BY_LIKES_COUNT = 1
         const val SORT_BY_COMMENTS_COUNT = 2
         const val SORT_BY_DATE_FROM_NEW = 3
@@ -96,7 +97,7 @@ data class SearchParams(
             dateRange = LongRange.EMPTY,
             title = "",
             filterReaded = false,
-            sort = SORT_BY_LIKES_COUNT
+            sort = SORT_BY_RELEVANCE
         )
     }
 }
