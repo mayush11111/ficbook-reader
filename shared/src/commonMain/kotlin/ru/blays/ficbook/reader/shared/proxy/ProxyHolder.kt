@@ -25,7 +25,7 @@ class ProxyHolder private constructor() : ProxySelector(), IProxyHolder {
     private var credentials: String? = null
 
     constructor(settings: Settings) : this() {
-        val enabled = settings.getBoolean(SettingsKeys.PROXY_ENABLED_KEY, true)
+        val enabled = settings.getBoolean(SettingsKeys.PROXY_ENABLED_KEY, false)
 
         if(enabled) {
             val useCustomProxy = settings.getBoolean(SettingsKeys.PROXY_USE_CUSTOM_KEY, false)

@@ -100,7 +100,7 @@ class DefaultSettingsProxyComponent(
 
     @OptIn(ExperimentalSerializationApi::class)
     private fun createState(): SettingsProxyComponent.State {
-        val enabled = settings.getBoolean(SettingsKeys.PROXY_ENABLED_KEY, true)
+        val enabled = settings.getBoolean(SettingsKeys.PROXY_ENABLED_KEY, false)
         val usedCustom = settings.getBoolean(SettingsKeys.PROXY_USE_CUSTOM_KEY, false)
         val customProxyConfig = settings.decodeValueOrNull(
             ProxyConfig.serializer(),
