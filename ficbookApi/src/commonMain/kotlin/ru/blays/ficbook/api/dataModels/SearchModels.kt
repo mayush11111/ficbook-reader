@@ -53,14 +53,10 @@ data class SearchedCharactersModel(
     data class Data(
         @SerialName("chars")
         val chars: List<Char>,
-        @SerialName("date_added")
-        val dateAdded: String,
         @SerialName("id")
         val id: Int,
         @SerialName("title")
         val title: String,
-        @SerialName("user_id")
-        val userId: Int
     ) {
         @Serializable
         data class Char(
