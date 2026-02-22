@@ -14,6 +14,7 @@ import ru.blays.ficbook.reader.shared.data.SearchedTagModel
 import ru.blays.ficbook.reader.shared.data.dto.*
 import ru.blays.ficbook.reader.shared.data.dto.FanficShortcut
 import ru.blays.ficbook.reader.shared.data.dto.NotificationType
+import ru.blays.ficbook.reader.shared.utils.toAbsoluteAssetUrl
 
 fun CollectionCardModel.toStableModel() = when(this) {
     is CollectionCardModel.Own -> CollectionCardModelStable.Own(
@@ -66,7 +67,7 @@ fun FanficCardModel.toStableModel() = FanficCardModelStable(
     readInfo = readInfo?.toStableModel(),
     tags = tags.map(FanficTag::toStableModel),
     description = description,
-    coverUrl = coverUrl.url,
+    coverUrl = coverUrl.url.toAbsoluteAssetUrl(),
     pairings = pairings.map(PairingModel::toStableModel),
     size = size
 )
@@ -96,7 +97,7 @@ fun FanficPageModel.toStableModel(
 ) = FanficPageModelStable(
     fanficID = id,
     name = name,
-    coverUrl = coverUrl.url,
+    coverUrl = coverUrl.url.toAbsoluteAssetUrl(),
     description = description,
     dedication = dedication,
     authorComment = authorComment,
@@ -151,7 +152,7 @@ fun LoginModel.toStableModel() = LoginModelStable(
 fun UserModel.toStableModel() = UserModelStable(
     name = name,
     href = href,
-    avatarUrl = avatarUrl
+    avatarUrl = avatarUrl.toAbsoluteAssetUrl()
 )
 
 fun AuthorizationResponseModel.toStableModel() = AuthorizationResponseModelStable(
@@ -224,8 +225,8 @@ fun AuthorMainInfo.toStableModel() = AuthorMainInfoStable(
     name = name,
     realID = realID,
     relativeID = relativeID,
-    avatarUrl = avatarUrl,
-    profileCoverUrl = profileCoverUrl,
+    avatarUrl = avatarUrl.toAbsoluteAssetUrl(),
+    profileCoverUrl = profileCoverUrl.toAbsoluteAssetUrl(),
     subscribers = subscribers,
     subscribed = subscribed
 )
@@ -252,20 +253,20 @@ fun BlogPostPageModel.toStableModel() = BlogPostModelStable(
 )
 
 fun AuthorPresentModel.toStableModel() = AuthorPresentModelStable(
-    pictureUrl = pictureUrl,
+    pictureUrl = pictureUrl.toAbsoluteAssetUrl(),
     text = text,
     user = user.toStableModel()
 )
 
 fun AuthorFanficPresentModel.toStableModel() = AuthorFanficPresentModelStable(
-    pictureUrl = pictureUrl,
+    pictureUrl = pictureUrl.toAbsoluteAssetUrl(),
     text = text,
     user = user.toStableModel(),
     forWork = forWork.toStableModel()
 )
 
 fun AuthorCommentPresentModel.toStableModel() = AuthorCommentPresentModelStable(
-    pictureUrl = pictureUrl,
+    pictureUrl = pictureUrl.toAbsoluteAssetUrl(),
     text = text,
     user = user.toStableModel(),
     forWork = forWork.toStableModel()
@@ -340,7 +341,7 @@ fun PopularAuthorModel.toStableModel() = PopularAuthorModelStable(
 fun AuthorSearchResult.Data.Result.toUserModel() = UserModelStable(
     name = username,
     href = "authors/$id",
-    avatarUrl = avatarPath
+    avatarUrl = avatarPath.toAbsoluteAssetUrl()
 )
 
 fun NotificationModel.toStableModel() = NotificationModelStable(

@@ -13,6 +13,7 @@ interface SettingsMainComponent {
     val blurRadius: SettingsUnitComponent<Float>
     val blurNoiseFactor: SettingsUnitComponent<Float>
 
+    val bypassBlock: SettingsUnitComponent<Boolean>
     val autoVoteSetting: SettingsUnitComponent<Boolean>
     val chromeCustomTabsSetting: SettingsUnitComponent<Boolean>?
     val typografSetting: SettingsUnitComponent<Boolean>

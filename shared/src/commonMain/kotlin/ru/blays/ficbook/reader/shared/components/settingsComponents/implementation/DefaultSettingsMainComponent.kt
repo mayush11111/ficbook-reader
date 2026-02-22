@@ -62,6 +62,12 @@ class DefaultSettingsMainComponent(
         defaultValue = GlassEffectConfig.DEFAULT.noiseFactor
     )
 
+    override val bypassBlock = DefaultSettingsUnitComponent(
+        componentContext = childContext("bypass_block"),
+        key = ISettingsRepository.booleanKey(SettingsKeys.BYPASS_BLOCK),
+        defaultValue = false
+    )
+
     override val autoVoteSetting = DefaultSettingsUnitComponent(
         componentContext = childContext("auto_vote_component"),
         key = ISettingsRepository.booleanKey(SettingsKeys.AUTO_VOTE_FOR_CONTINUE),

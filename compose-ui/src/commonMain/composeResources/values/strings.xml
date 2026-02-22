@@ -235,6 +235,8 @@
     <string name="setting_subtitle_accent">Выбрать цвет акцента</string>
     <string name="setting_title_superfilter">Суперфильтр фанфиков</string>
     <string name="setting_subtitle_superfilter">Скрытие фанфиков по различным параметрам</string>
+    <string name="setting_title_bypass_block">Обход блокировки</string>
+    <string name="setting_subtitle_bypass_block">Использовать обход из официального приложения</string>
     <string name="setting_title_auto_vote">Авто-голосование</string>
     <string name="setting_subtitle_auto_vote">Автоматически ставить "Жду продолжения"</string>
     <string name="setting_title_custom_tabs">Chrome Custom Tabs</string>

@@ -130,6 +130,7 @@ fun SettingsMainContent(component: SettingsMainComponent) {
                             SettingsMainComponent.Output.Superfilter
                         )
                     }
+                    BypassBlockSetting(component.bypassBlock)
                     AutoVoteSetting(component.autoVoteSetting)
                     TypografSetting(component.typografSetting)
                     if(component.chromeCustomTabsSetting != null) {
@@ -280,6 +281,22 @@ private fun SuperfilterSetting(onClick: () -> Unit) {
         shape = CardShape.CardStart,
         onClick = onClick
     )
+}
+
+@Composable
+private fun BypassBlockSetting(component: SettingsUnitComponent<Boolean>) {
+    val state by component.state.collectAsState()
+    SettingsCardWithSwitch(
+        title = stringResource(Res.string.setting_title_bypass_block),
+        subtitle = stringResource(Res.string.setting_subtitle_bypass_block),
+        enabled = state,
+        icon = painterResource(Res.drawable.ic_ban),
+        shape = CardShape.CardMid,
+    ) { newValue ->
+        component.onIntent(
+            SettingsUnitComponent.Intent.ChangeValue(newValue)
+        )
+    }
 }
 
 @Composable

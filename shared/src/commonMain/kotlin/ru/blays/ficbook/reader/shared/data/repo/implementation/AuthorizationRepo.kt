@@ -23,6 +23,7 @@ import ru.blays.ficbook.reader.shared.platformUtils.downloadImageToFile
 import ru.blays.ficbook.reader.shared.platformUtils.getFilesDir
 import ru.blays.ficbook.reader.shared.preferences.SettingsKeys
 import ru.blays.ficbook.reader.shared.preferences.settings
+import ru.blays.ficbook.reader.shared.utils.toAbsoluteAssetUrl
 import java.io.File
 
 class AuthorizationRepo(
@@ -157,7 +158,7 @@ class AuthorizationRepo(
             it.parentFile?.mkdirs()
         }
         val successfulSaved = downloadImageToFile(
-            url = user.avatarUrl,
+            url = user.avatarUrl.toAbsoluteAssetUrl(),
             file = avatarFile,
             formatName = "png"
         )

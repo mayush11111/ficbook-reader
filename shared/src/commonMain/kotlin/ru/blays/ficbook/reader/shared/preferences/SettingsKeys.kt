@@ -29,6 +29,7 @@ object SettingsKeys {
 
     // Common
     const val SUPERFILTER_KEY: String = "superfilter"
+    const val BYPASS_BLOCK: String = "bypass_block"
     const val AUTO_VOTE_FOR_CONTINUE: String = "auto_vote_for_continue"
     const val CHROME_CUSTOM_TABS_KEY: String = "chrome_custom_tabs"
     const val ANONYMOUS_MODE_KEY: String = "anonymous_mode"
