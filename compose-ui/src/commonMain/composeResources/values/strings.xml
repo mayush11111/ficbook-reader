@@ -212,7 +212,8 @@
     <string name="direction_article">Статья</string>
 
     <string name="only_translations">Только переводы</string>
-    
+
+    <string name="sort_by_relevance">по релевантности</string>
     <string name="sort_by_likes">по оценкам читателей</string>
     <string name="sort_by_comments">по количеству отзывов</string>
     <string name="sort_by_date_from_new">по дате обновления (от новых к старым)</string>

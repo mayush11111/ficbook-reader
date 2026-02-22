@@ -1686,6 +1686,13 @@ fun SortTypeSelector(
             overflow = TextOverflow.Ellipsis
         )
         RadioButtonWithTitle(
+            selected = value == SearchParams.SORT_BY_RELEVANCE,
+            title = stringResource(Res.string.sort_by_relevance),
+            onClick = {
+                onSelect(SearchParams.SORT_BY_RELEVANCE)
+            }
+        )
+        RadioButtonWithTitle(
             selected = value == SearchParams.SORT_BY_LIKES_COUNT,
             title = stringResource(Res.string.sort_by_likes),
             onClick = {
