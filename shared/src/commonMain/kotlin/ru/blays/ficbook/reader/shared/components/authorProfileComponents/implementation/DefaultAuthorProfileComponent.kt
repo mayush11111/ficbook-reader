@@ -28,6 +28,7 @@ import ru.blays.ficbook.reader.shared.components.fanficListComponents.declaratio
 import ru.blays.ficbook.reader.shared.components.fanficListComponents.implementation.DefaultFanficsListComponent
 import ru.blays.ficbook.reader.shared.data.mappers.toApiModel
 import ru.blays.ficbook.reader.shared.data.repo.declaration.IAuthorProfileRepo
+import ru.blays.ficbook.reader.shared.platformUtils.runOnUiThread
 import ru.blays.ficbook.reader.shared.stateHandle.SaveableMutableValue
 
 class DefaultAuthorProfileComponent private constructor(
@@ -338,28 +339,33 @@ class DefaultAuthorProfileComponent private constructor(
             }
 
             is ApiResult.Success -> {
-                val availableTabs = createComponentsForProfile(
-                    relativeID = result.value.authorMain.relativeID,
-                    tabs = result.value.availableTabs
-                )
-                transformTabsStack(availableTabs)
-                followComponent.update(
-                    authorID = result.value.authorMain.realID,
-                    currentValue = result.value.authorMain.subscribed
-                )
-                _state.update {
-                    it.copy(
-                        loading = false,
-                        error = false,
-                        profile = result.value,
-                        availableTabs = availableTabs
+                var availableTabs:  List<AuthorProfileComponent.TabConfig>? = null
+                runOnUiThread {
+                    availableTabs = createComponentsForProfile(
+                        relativeID = result.value.authorMain.relativeID,
+                        tabs = result.value.availableTabs
+                    )
+
+                    transformTabsStack(availableTabs)
+                    followComponent.update(
+                        authorID = result.value.authorMain.realID,
+                        currentValue = result.value.authorMain.subscribed
                     )
                 }
+                if (availableTabs != null)
+                    _state.update {
+                        it.copy(
+                            loading = false,
+                            error = false,
+                            profile = result.value,
+                            availableTabs = availableTabs
+                        )
+                    }
             }
         }
     }
 
-    private suspend fun createComponentsForProfile(
+    private fun createComponentsForProfile(
         relativeID: String,
         tabs: List<AuthorProfileTabs>
     ): List<AuthorProfileComponent.TabConfig> {
