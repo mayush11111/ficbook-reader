@@ -160,23 +160,25 @@ internal class AuthorInfoParser {
 internal class AuthorBlogPostsParser {
     suspend fun parse(data: Document): List<BlogPostCardModel> {
         val posts = data.select(
-            Evaluator.Class("user-blog-post-item content-box")
+            Evaluator.Class("blog-post")
         )
         if (posts.isEmpty()) return emptyList()
 
         return posts.map { element ->
             val (href, title) = element.select(".word-break").let {
-                val id = it.attr("href")
+                val id = it.select("a").attr("href")
                     .substringBefore('#')
                     .substringAfterLast('/')
                 val text = it.text()
                 return@let id to text
             }
             val date = element.select(
-                Evaluator.Class("small-text text-muted")
+                Evaluator.Class("text-n1 text-muted")
             ).text()
 
-            val text = element.select(".mt-5 div")
+            val text = element.select(
+                Evaluator.Class("text-t3 urlize-links")
+            )
                 .wholeText
                 .trim()
 
@@ -199,9 +201,9 @@ internal class AuthorBlogPostsParser {
 internal class AuthorBlogPostParser {
     suspend fun parse(data: Document): BlogPostPageModel {
         val container = data.select("section#content" )
-        val title = container.select(".mb-10").text().trim()
-        val date = container.select("div[class*=mb-10]").text()
-        val text = container.select("div[class*=mb-15]")
+        val title = container.select("h1[class*=text-t1]").text().trim()
+        val date = container.select("div[class*=text-n1]").text()
+        val text = container.select("div[class*=text-preline]")
             .wholeText
             .trim()
         val likes = container.select("like-button")
