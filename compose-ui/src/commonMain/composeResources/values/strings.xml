@@ -266,7 +266,9 @@
     <string name="fanficCard_size">Размер: %1$s</string>
 
     <!--  About  -->
-    <string name="about_group_app">Приложение</string>
+    <string name="about_group_fork_info">Данное приложение является форком, т.е. неоригинальным!</string>
+    <string name="about_group_fork">Форк</string>
+    <string name="about_group_app">Оригинальное приложение</string>
     <string name="about_group_developer">Разработчик</string>
     <string name="about_title_tg_group">Группа в Telegram</string>
     <string name="about_title_source_code">Исходный код на GitHub</string>
@@ -373,6 +375,7 @@
     <string name="error_something_went_wrong">Что-то пошло не так</string>
     <string name="error_authorization">Ошибка авторизации.\n%1$s</string>
 
+    <string name="link_fork_github_repo">https://github.com/mayush11111/ficbook-reader</string>
     <string name="link_tg_group">https://t.me/ficbook_reader</string>
     <string name="link_github_repo">https://github.com/B1ays/ficbook-reader</string>
     <string name="link_developer_tg">https://t.me/B1ays</string>

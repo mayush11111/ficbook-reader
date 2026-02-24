@@ -67,6 +67,7 @@ fun AboutContent(onBack: () -> Unit) {
             )
         }
     ) { padding ->
+        val forkGroupTitle = stringResource(Res.string.about_group_fork)
         val appGroupTitle = stringResource(Res.string.about_group_app)
         val developerGroupTitle = stringResource(Res.string.about_group_developer)
 
@@ -75,6 +76,10 @@ fun AboutContent(onBack: () -> Unit) {
             modifier = Modifier,
         ) {
             item { Header() }
+            item { ForkWarning() }
+            itemWithHeader(forkGroupTitle) {
+                ForkGroup()
+            }
             itemWithHeader(appGroupTitle) {
                 AppGroup()
             }
@@ -110,6 +115,38 @@ private fun Header() {
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.W300
         )
+    }
+}
+
+@Composable
+fun ForkWarning() {
+    Column(
+        modifier = Modifier
+            .padding(DefaultPadding.CardDefaultPadding)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text =  stringResource(Res.string.about_group_fork_info),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Red
+        )
+    }
+}
+
+@Composable
+fun ForkGroup() {
+    val scope = rememberCoroutineScope()
+    ItemCard(
+        title = stringResource(Res.string.about_title_source_code),
+        iconPainter = painterResource(Res.drawable.ic_github),
+        shape = CardShape.CardStandalone,
+        modifier = Modifier.padding(DefaultPadding.CardPaddingSmallVertical),
+    ) {
+        scope.launch {
+            openInBrowser(getString(Res.string.link_fork_github_repo))
+        }
     }
 }
 
