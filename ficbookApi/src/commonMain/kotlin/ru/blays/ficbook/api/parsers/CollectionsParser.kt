@@ -39,6 +39,8 @@ internal class CollectionParser {
         val size = data
             .select("div.collection-thumb-info")
             .text()
+            .substringAfter('(')
+            .substringBefore(')')
             .replace(
                 regex = notNumberRegex,
                 replacement = ""
