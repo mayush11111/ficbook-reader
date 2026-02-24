@@ -83,7 +83,7 @@ internal class NotificationsApiImpl(
         return@coroutineScope try {
             client.get(
                 url = ficbookUrl {
-                    href("ajax/user_notifications/delete_all")
+                    href("user_notifications/delete_all")
                 }
             )
             ApiResult.success(Unit)
@@ -96,7 +96,7 @@ internal class NotificationsApiImpl(
         return@coroutineScope try {
             client.get(
                 url = ficbookUrl {
-                    href("ajax/user_notifications/mark_old_all")
+                    href("user_notifications/mark_old_all")
                 }
             )
             ApiResult.success(Unit)
