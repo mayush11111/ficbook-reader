@@ -141,7 +141,7 @@
     <string name="notifications_category_new_in_liked_requests">Новые работы по понравившимся заявкам</string>
     <string name="notifications_category_helpdesk_responses">Ответы службы поддержки</string>
     <string name="notifications_category_new_presents">Новые подарки</string>
-    <string name="notifications_category_new_achievements">Новые достижения</string>
+    <string name="notifications_category_achievements">Достижения</string>
     <string name="notifications_category_text_changed_in_edited_fanfic">Изменения в тексте работы, где я бета/гамма/соавтор</string>
     <string name="notifications_category_messages_about_error">Сообщения об ошибках</string>
     <string name="notifications_category_request_for_coauthorship">Запросы на соавторство</string>

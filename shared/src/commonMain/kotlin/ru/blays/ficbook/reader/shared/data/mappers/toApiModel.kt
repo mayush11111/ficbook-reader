@@ -31,7 +31,7 @@ fun NotificationType.toApiModel() = when(this) {
     NotificationType.HELPDESK_RESPONSES -> ru.blays.ficbook.api.dataModels.NotificationType.HELPDESK_RESPONSES
     NotificationType.TEXT_CHANGES_IN_OWN_FANFIC -> ru.blays.ficbook.api.dataModels.NotificationType.TEXT_CHANGES_IN_OWN_FANFIC
     NotificationType.NEW_PRESENTS -> ru.blays.ficbook.api.dataModels.NotificationType.NEW_PRESENTS
-    NotificationType.NEW_ACHIEVEMENTS -> ru.blays.ficbook.api.dataModels.NotificationType.NEW_ACHIEVEMENTS
+    NotificationType.ACHIEVEMENTS -> ru.blays.ficbook.api.dataModels.NotificationType.ACHIEVEMENTS
     NotificationType.TEXT_CHANGES_IN_EDITED_FANFIC -> ru.blays.ficbook.api.dataModels.NotificationType.TEXT_CHANGES_IN_EDITED_FANFIC
     NotificationType.ERROR_MESSAGES -> ru.blays.ficbook.api.dataModels.NotificationType.ERROR_MESSAGES
     NotificationType.REQUESTS_FOR_COAUTHORSHIPS -> ru.blays.ficbook.api.dataModels.NotificationType.REQUESTS_FOR_COAUTHORSHIPS

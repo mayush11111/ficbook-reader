@@ -58,6 +58,7 @@ class NotificationsParser {
             title.contains("Новые работы в сборниках") -> NotificationType.NEW_WORKS_IN_COLLECTIONS
             title.contains("Новые части в работе") -> NotificationType.UPDATES_IN_FANFICS
             title.contains("Оповещения о новых блогах") -> NotificationType.NEW_BLOGS
+            title.contains("Достижения") -> NotificationType.ACHIEVEMENTS
             else -> NotificationType.UNKNOWN
         }
     }

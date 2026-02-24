@@ -503,7 +503,7 @@ private fun getCategoryName(category: NotificationType): String {
         NotificationType.HELPDESK_RESPONSES -> stringResource(Res.string.notifications_category_helpdesk_responses)
         NotificationType.TEXT_CHANGES_IN_OWN_FANFIC -> ""
         NotificationType.NEW_PRESENTS -> stringResource(Res.string.notifications_category_new_presents)
-        NotificationType.NEW_ACHIEVEMENTS -> stringResource(Res.string.notifications_category_new_achievements)
+        NotificationType.ACHIEVEMENTS -> stringResource(Res.string.notifications_category_achievements)
         NotificationType.TEXT_CHANGES_IN_EDITED_FANFIC -> stringResource(Res.string.notifications_category_text_changed_in_edited_fanfic)
         NotificationType.ERROR_MESSAGES -> stringResource(Res.string.notifications_category_messages_about_error)
         NotificationType.REQUESTS_FOR_COAUTHORSHIPS -> stringResource(Res.string.notifications_category_request_for_coauthorship)
