@@ -273,30 +273,18 @@ internal class FanficPageParser {
         val pagesCount: Int = mb10.run {
             val sizeElements = select("div:contains(Размер:)")
             if (sizeElements.isNotEmpty()) {
-                val sizeInfoParts = sizeElements.text().split(", ")
-                when (sizeInfoParts.size) {
-                    3 -> {
-                        val rawString = sizeInfoParts[0]
-                        return@run rawString.replace(
-                            regex = notNumberRegex,
-                            replacement = ""
-                        )
-                        .toIntOrNull()
-                        ?: 0
+                val rawString = sizeElements
+                    .text()
+                    .split(", ")
+                    .first {
+                        it.contains("страниц")
                     }
-
-                    2 -> {
-                        val rawString = sizeInfoParts[0]
-                        return@run rawString.replace(
-                            regex = notNumberRegex,
-                            replacement = ""
-                        )
-                        .toIntOrNull()
-                        ?: 0
-                    }
-
-                    else -> 0
-                }
+                return@run rawString.replace(
+                    regex = notNumberRegex,
+                    replacement = ""
+                )
+                    .toIntOrNull()
+                    ?: 0
             } else 0
         }
 
