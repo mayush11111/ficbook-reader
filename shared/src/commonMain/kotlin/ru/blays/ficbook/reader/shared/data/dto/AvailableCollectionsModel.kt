@@ -20,7 +20,7 @@ data class AvailableCollectionsModel(
             val id: Int,
             val isInThisCollection: Int,
             val isPublic: Boolean,
-            val lastUpdated: String,
+            val lastUpdated: String?,
             val name: String,
             val slug: String
         ) {
