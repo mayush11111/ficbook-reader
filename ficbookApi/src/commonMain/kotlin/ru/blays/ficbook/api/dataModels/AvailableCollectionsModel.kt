@@ -33,7 +33,7 @@ data class AvailableCollectionsModel(
             @SerialName("is_public")
             val isPublic: Boolean,
             @SerialName("last_updated")
-            val lastUpdated: String,
+            val lastUpdated: String?,
             @SerialName("name")
             val name: String,
             @SerialName("slug")
