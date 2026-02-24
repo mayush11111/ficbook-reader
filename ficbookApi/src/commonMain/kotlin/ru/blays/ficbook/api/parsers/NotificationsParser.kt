@@ -10,15 +10,18 @@ import ru.blays.ficbook.api.dataModels.NotificationType
 class NotificationsParser {
     suspend fun parse(data: Document): List<NotificationModel> {
         val elements = data.select(
-            Evaluator.Class("notification-item js-read-notification")
+            Evaluator.Class("notification-item")
         )
 
         return elements.map { element ->
             val href = element.attr(ATTR_HREF)
-            val title = element.select(".notification-title").text().trim(' ', '\n')
             val date = element.select(".date").text()
             val text = element.select(".word-break").text()
-            val readed = element.select(".dot").isEmpty()
+            val badge_new = element.select(".badge-new")
+            val readed = badge_new.isEmpty()
+            if (!readed)
+                badge_new.remove()
+            val title = element.select(".text-n1").text().trim(' ', '\n')
             val category = getCategoryForTitle(title)
 
             NotificationModel(
