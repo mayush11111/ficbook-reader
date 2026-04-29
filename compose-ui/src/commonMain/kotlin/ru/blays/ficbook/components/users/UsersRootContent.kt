@@ -31,24 +31,27 @@ import ru.hh.toolbar.custom_toolbar.CollapsingToolbar
 @Composable
 fun UsersRootContent(component: UsersRootComponent) {
     val pagesState = component.tabs.subscribeAsState()
-    val onPageSelected = { index: Int ->
-        component.sendIntent(
-            UsersRootComponent.Intent.SelectTab(
-                index = index
-            )
-        )
-    }
+    UsersRootContent(
+        pagesState = pagesState,
+        onSelectTab = { component.sendIntent(UsersRootComponent.Intent.SelectTab(it)) },
+        onOutput = component::onOutput
+    )
+}
+
+@OptIn(ExperimentalDecomposeApi::class)
+@Composable
+internal fun UsersRootContent(
+    pagesState: State<ChildPages<UsersRootComponent.TabConfig, UsersRootComponent.Tabs>>,
+    onSelectTab: (Int) -> Unit,
+    onOutput: (UsersRootComponent.Output) -> Unit,
+) {
     Scaffold(
         modifier = Modifier.systemBarsPadding(),
         topBar = {
             CollapsingToolbar(
                 navigationIcon = {
                     IconButton(
-                        onClick = {
-                            component.onOutput(
-                                UsersRootComponent.Output.NavigateBack
-                            )
-                        }
+                        onClick = { onOutput(UsersRootComponent.Output.NavigateBack) }
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.ic_arrow_back),
@@ -63,10 +66,10 @@ fun UsersRootContent(component: UsersRootComponent) {
         BoxWithConstraints(
             modifier = Modifier.padding(top = padding.calculateTopPadding()),
         ) {
-            if(maxWidth > 600.dp) {
-                LandscapeContent(pagesState, onPageSelected)
+            if(this.maxWidth > 600.dp) {
+                LandscapeContent(pagesState, onSelectTab)
             } else {
-                PortraitContent(pagesState, onPageSelected)
+                PortraitContent(pagesState, onSelectTab)
             }
         }
     }
@@ -122,7 +125,7 @@ fun UsersPager(
         modifier = Modifier.fillMaxWidth(),
     ) {
         val widthFill = if(scaleContent) {
-            when (maxWidth) {
+            when (this.maxWidth) {
                 in 1500.dp..Dp.Infinity -> 0.5F
                 in 1200.dp..1500.dp -> 0.6F
                 in 1000.dp..1200.dp -> 0.7F

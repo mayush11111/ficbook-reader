@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.arkivanov.decompose.Child
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import ficbook_reader.compose_ui.generated.resources.*
 import kotlinx.coroutines.launch
@@ -24,10 +25,21 @@ import ru.blays.ficbook.ui_components.CustomBottomSheetScaffold.rememberBottomSh
 @Composable
 fun LandingScreenContent(component: LandingScreenComponent) {
     val dialogState by component.confirmDialog.subscribeAsState()
+    LandingScreenContent(
+        dialogChild = dialogState.child,
+        onIntent = component::sendIntent
+    )
+}
+
+@Composable
+internal fun LandingScreenContent(
+    dialogChild: Child.Created<ConfirmDialogConfig, ConfirmDialogComponent>?,
+    onIntent: (LandingScreenComponent.Intent) -> Unit
+) {
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
     EnhancedBottomSheetScaffold(
         sheetContent = {
-            dialogState.child?.let {
+            dialogChild?.let {
                 ConfirmDialogContent(it.instance, it.configuration)
                 Spacer(modifier = Modifier.navigationBarsPadding())
             }
@@ -58,9 +70,7 @@ fun LandingScreenContent(component: LandingScreenComponent) {
                 Button(
                     shape = MaterialTheme.shapes.medium,
                     onClick = {
-                        component.sendIntent(
-                            LandingScreenComponent.Intent.AddNewAccount
-                        )
+                        onIntent(LandingScreenComponent.Intent.AddNewAccount)
                     },
                     modifier = Modifier
                         .height(44.dp)
@@ -80,9 +90,7 @@ fun LandingScreenContent(component: LandingScreenComponent) {
                 OutlinedButton(
                     shape = MaterialTheme.shapes.medium,
                     onClick = {
-                        component.sendIntent(
-                            LandingScreenComponent.Intent.Register
-                        )
+                        onIntent(LandingScreenComponent.Intent.Register)
                     },
                     modifier = Modifier
                         .height(44.dp)
@@ -102,9 +110,7 @@ fun LandingScreenContent(component: LandingScreenComponent) {
                 OutlinedButton(
                     shape = MaterialTheme.shapes.medium,
                     onClick = {
-                        component.sendIntent(
-                            LandingScreenComponent.Intent.EnableAnonymousMode
-                        )
+                        onIntent(LandingScreenComponent.Intent.EnableAnonymousMode)
                     },
                     modifier = Modifier
                         .height(44.dp)
@@ -127,15 +133,14 @@ fun LandingScreenContent(component: LandingScreenComponent) {
 
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(dialogState.child) {
+    LaunchedEffect(dialogChild) {
         scope.launch {
-            if(dialogState.child != null) {
+            if(dialogChild != null) {
                 bottomSheetScaffoldState.bottomSheetState.expand()
             } else {
                 bottomSheetScaffoldState.bottomSheetState.partialExpand()
             }
         }
-
     }
 }
 

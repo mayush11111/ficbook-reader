@@ -52,7 +52,7 @@ fun CollectionsContentExtended(
 ) {
     Column {
         VerticalSpacer(contentPadding?.calculateTopPadding() ?: 0.dp)
-        CollectionsControlContent(component)
+        CollectionsControlContent(component::sendIntent)
         CollectionsContent(
             component = component,
             contentPadding = null
@@ -67,6 +67,17 @@ fun CollectionsContent(
     contentPadding: PaddingValues?
 ) {
     val state by component.state.subscribeAsState()
+    CollectionsContent(modifier, state, component::sendIntent, component::onOutput, contentPadding)
+}
+
+@Composable
+internal fun CollectionsContent(
+    modifier: Modifier = Modifier,
+    state: CollectionsListComponent.State,
+    onIntent: (CollectionsListComponent.Intent) -> Unit,
+    onOutput: (CollectionsListComponent.Output) -> Unit,
+    contentPadding: PaddingValues?
+) {
     val list = remember(state) { state.list }
     val isLoading = remember(state) { state.isLoading }
 
@@ -82,9 +93,7 @@ fun CollectionsContent(
             state = pullRefreshState,
             isRefreshing = isLoading,
             onRefresh = {
-                component.sendIntent(
-                    CollectionsListComponent.Intent.Refresh
-                )
+                onIntent(CollectionsListComponent.Intent.Refresh)
             }
         ) {
             LazyVerticalGrid(
@@ -99,7 +108,8 @@ fun CollectionsContent(
                 items(list) { collection ->
                     CollectionItem(
                         collectionModel = collection,
-                        component = component
+                        onIntent = onIntent,
+                        onOutput = onOutput,
                     )
                 }
             }
@@ -109,6 +119,16 @@ fun CollectionsContent(
 
 @Composable
 fun CollectionsScreenContent(component: CollectionsListComponent) {
+    val state by component.state.subscribeAsState()
+    CollectionsScreenContent(state, component::sendIntent, component::onOutput)
+}
+
+@Composable
+internal fun CollectionsScreenContent(
+    state: CollectionsListComponent.State,
+    onIntent: (CollectionsListComponent.Intent) -> Unit,
+    onOutput: (CollectionsListComponent.Output) -> Unit,
+) {
     val blurEnabled = LocalBlurState.current
     val hazeState = remember(::HazeState)
 
@@ -118,9 +138,7 @@ fun CollectionsScreenContent(component: CollectionsListComponent) {
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            component.onOutput(
-                                CollectionsListComponent.Output.NavigateBack
-                            )
+                            onOutput(CollectionsListComponent.Output.NavigateBack)
                         }
                     ) {
                         Icon(
@@ -144,7 +162,9 @@ fun CollectionsScreenContent(component: CollectionsListComponent) {
         }
     ) { padding ->
         CollectionsContent(
-            component = component,
+            state = state,
+            onIntent = onIntent,
+            onOutput = onOutput,
             contentPadding = padding,
             modifier = Modifier.thenIf(blurEnabled) {
                 haze(hazeState)
@@ -157,7 +177,8 @@ fun CollectionsScreenContent(component: CollectionsListComponent) {
 @Composable
 private fun CollectionItem(
     collectionModel: CollectionCardModelStable,
-    component: CollectionsListComponent,
+    onIntent: (CollectionsListComponent.Intent) -> Unit,
+    onOutput: (CollectionsListComponent.Output) -> Unit,
 ) {
     Card(
         modifier = Modifier
@@ -168,28 +189,19 @@ private fun CollectionItem(
             is CollectionCardModelStable.Other -> OtherCollectionContent(
                 collection = collectionModel,
                 onClick = {
-                    component.onOutput(
-                        CollectionsListComponent.Output.OpenCollection(
-                            collectionModel
-                        )
-                    )
+                    onOutput(CollectionsListComponent.Output.OpenCollection(collectionModel))
                 },
                 onUserClick = {
-                    component.onOutput(
-                        CollectionsListComponent.Output.OpenUser(collectionModel.owner)
-                    )
+                    onOutput(CollectionsListComponent.Output.OpenUser(collectionModel.owner))
                 },
                 onChangeSubscription = {
-                    component.sendIntent(
-                        CollectionsListComponent.Intent.ChangeSubscription(
-                            collection = collectionModel
-                        )
-                    )
+                    onIntent(CollectionsListComponent.Intent.ChangeSubscription(collection = collectionModel))
                 }
             )
             is CollectionCardModelStable.Own -> OwnCollectionContent(
-                component = component,
                 collection = collectionModel,
+                onIntent = onIntent,
+                onOutput = onOutput,
             )
         }
     }
@@ -198,8 +210,9 @@ private fun CollectionItem(
 @Composable
 private fun OwnCollectionContent(
     modifier: Modifier = Modifier,
-    component: CollectionsListComponent,
-    collection: CollectionCardModelStable.Own
+    collection: CollectionCardModelStable.Own,
+    onIntent: (CollectionsListComponent.Intent) -> Unit,
+    onOutput: (CollectionsListComponent.Output) -> Unit,
 ) {
     val contextMenuState = rememberContextMenuState()
 
@@ -213,11 +226,7 @@ private fun OwnCollectionContent(
         modifier = modifier
             .combinedClickable(
                 onClick = {
-                    component.onOutput(
-                        CollectionsListComponent.Output.OpenCollection(
-                            collection = collection
-                        )
-                    )
+                    onOutput(CollectionsListComponent.Output.OpenCollection(collection = collection))
                 },
                 onLongClick = contextMenuState::show
             )
@@ -288,11 +297,7 @@ private fun OwnCollectionContent(
                 )
             },
             onClick = {
-                component.sendIntent(
-                    CollectionsListComponent.Intent.UpdateCollection(
-                        collection = collection
-                    )
-                )
+                onIntent(CollectionsListComponent.Intent.UpdateCollection(collection = collection))
             }
         )
         DropdownMenuItem(
@@ -313,9 +318,7 @@ private fun OwnCollectionContent(
     if (showDeleteConfirmDialog) {
         DeleteCollectionConfirmDialog(
             onConfirm = {
-                component.sendIntent(
-                    CollectionsListComponent.Intent.DeleteCollection(collection.realID)
-                )
+                onIntent(CollectionsListComponent.Intent.DeleteCollection(collection.realID))
                 showDeleteConfirmDialog = false
             },
             onDismiss = {
@@ -458,7 +461,9 @@ private fun OtherCollectionContent(
 }
 
 @Composable
-private fun CollectionsControlContent(component: CollectionsListComponent) {
+private fun CollectionsControlContent(
+    onIntent: (CollectionsListComponent.Intent) -> Unit,
+) {
     var showCreateCollectionDialog by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier.padding(DefaultPadding.CardDefaultPadding),
@@ -484,7 +489,7 @@ private fun CollectionsControlContent(component: CollectionsListComponent) {
     }
     if (showCreateCollectionDialog) {
         CreateCollectionDialog(
-            component = component,
+            onIntent = onIntent,
             onDismiss = { showCreateCollectionDialog = false }
         )
     }
@@ -523,7 +528,7 @@ fun DeleteCollectionConfirmDialog(
 
 @Composable
 private fun CreateCollectionDialog(
-    component: CollectionsListComponent,
+    onIntent: (CollectionsListComponent.Intent) -> Unit,
     onDismiss: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
@@ -577,7 +582,7 @@ private fun CreateCollectionDialog(
                     HorizontalSpacer(8.dp)
                     Button(
                         onClick = {
-                            component.sendIntent(
+                            onIntent(
                                 CollectionsListComponent.Intent.CreateCollection(
                                     name = name,
                                     description = description,

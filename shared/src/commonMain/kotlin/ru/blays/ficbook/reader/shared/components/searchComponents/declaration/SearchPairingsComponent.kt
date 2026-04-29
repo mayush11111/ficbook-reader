@@ -11,20 +11,15 @@ interface SearchPairingsComponent {
 
     val defaultCharacterModifiers: Array<String>
 
-    fun selectPairing(
-        select: Boolean,
-        pairing: SearchedPairingModel
-    )
-    fun excludePairing(
-        exclude: Boolean,
-        pairing: SearchedPairingModel
-    )
+    fun sendIntent(intent: Intent)
 
-    fun addCharacterToPairing(character: SearchedCharacterModel)
-
-    fun clearBuildedPairing()
-
-    fun changeCharacterModifier(character: SearchedPairingModel.Character, modifier: String)
+    sealed class Intent {
+        data class SelectPairing(val select: Boolean, val pairing: SearchedPairingModel) : Intent()
+        data class ExcludePairing(val exclude: Boolean, val pairing: SearchedPairingModel) : Intent()
+        data class AddCharacterToPairing(val character: SearchedCharacterModel) : Intent()
+        data object ClearBuiltPairing : Intent()
+        data class ChangeCharacterModifier(val character: SearchedPairingModel.Character, val modifier: String) : Intent()
+    }
 
     @Serializable
     data class State(

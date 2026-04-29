@@ -68,10 +68,34 @@ fun CommentsContent(
         blocks: List<CommentBlockModelStable>
     ) -> Unit = { _, _ -> }
 ) {
+    val state by component.state.subscribeAsState()
+    CommentsContent(
+        state = state,
+        onIntent = component::sendIntent,
+        onOutput = component::onOutput,
+        contentPadding = contentPadding,
+        hideAvatar = hideAvatar,
+        modifier = modifier,
+        onAddReply = onAddReply
+    )
+}
+
+@Composable
+internal fun CommentsContent(
+    state: CommentsComponent.State,
+    onIntent: (CommentsComponent.Intent) -> Unit,
+    onOutput: (CommentsComponent.Output) -> Unit,
+    contentPadding: PaddingValues? = null,
+    hideAvatar: Boolean = false,
+    modifier: Modifier = Modifier,
+    onAddReply: (
+        userName: String,
+        blocks: List<CommentBlockModelStable>
+    ) -> Unit = { _, _ -> }
+) {
     @Suppress("NAME_SHADOWING")
     val contentPadding = contentPadding ?: PaddingValues(0.dp)
 
-    val state by component.state.subscribeAsState()
     val comments = state.comments
     val isLoading = state.loading
 
@@ -83,9 +107,7 @@ fun CommentsContent(
 
     LaunchedEffect(canScrollForward) {
         if (!canScrollForward && canScrollBackward) {
-            component.sendIntent(
-                CommentsComponent.Intent.LoadNextPage
-            )
+            onIntent(CommentsComponent.Intent.LoadNextPage)
         }
     }
 
@@ -94,9 +116,7 @@ fun CommentsContent(
         isRefreshing = isLoading,
         state = pullRefreshState,
         onRefresh = {
-            component.sendIntent(
-                CommentsComponent.Intent.Refresh
-            )
+            onIntent(CommentsComponent.Intent.Refresh)
         },
         indicator = {
             PullToRefreshDefaults.Indicator(
@@ -124,24 +144,16 @@ fun CommentsContent(
                     comment = comment,
                     hideAvatar = hideAvatar,
                     onFanficClick = { href ->
-                        component.onOutput(
-                            CommentsComponent.Output.OpenFanfic(href)
-                        )
+                        onOutput(CommentsComponent.Output.OpenFanfic(href))
                     },
                     onUserClick = {
-                        component.onOutput(
-                            CommentsComponent.Output.OpenAuthor(comment.user.href)
-                        )
+                        onOutput(CommentsComponent.Output.OpenAuthor(comment.user.href))
                     },
                     onUrlClick = { url ->
-                        component.onOutput(
-                            CommentsComponent.Output.OpenUrl(url)
-                        )
+                        onOutput(CommentsComponent.Output.OpenUrl(url))
                     },
                     onLikeClick = {
-                        component.sendIntent(
-                            CommentsComponent.Intent.LikeComment(comment.commentID, !comment.isLiked)
-                        )
+                        onIntent(CommentsComponent.Intent.LikeComment(comment.commentID, !comment.isLiked))
                     },
                     onAddReply = {
                         onAddReply(
@@ -150,9 +162,7 @@ fun CommentsContent(
                         )
                     },
                     onDelete = {
-                        component.sendIntent(
-                            CommentsComponent.Intent.DeleteComment(comment.commentID)
-                        )
+                        onIntent(CommentsComponent.Intent.DeleteComment(comment.commentID))
                     }
                 )
             }
@@ -179,6 +189,7 @@ private fun CommentItem(
     onDelete: () -> Unit = {}
 ) {
     val user = comment.user
+    val isPreview = androidx.compose.ui.platform.LocalInspectionMode.current
 
     Row(
         modifier = Modifier
@@ -187,16 +198,27 @@ private fun CommentItem(
         verticalAlignment = Alignment.Bottom
     ) {
         if (!hideAvatar) {
-            AsyncImage(
-                model = user.avatarUrl,
-                contentDescription = stringResource(Res.string.content_description_icon_author_avatar),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .padding(bottom = 4.dp)
-                    .size(50.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onUserClick)
-            )
+            if (isPreview) {
+                Box(
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .size(50.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable(onClick = onUserClick)
+                )
+            } else {
+                AsyncImage(
+                    model = user.avatarUrl,
+                    contentDescription = stringResource(Res.string.content_description_icon_author_avatar),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .size(50.dp)
+                        .clip(CircleShape)
+                        .clickable(onClick = onUserClick)
+                )
+            }
             Spacer(modifier = Modifier.requiredWidth(9.dp))
         }
         Card(
@@ -314,28 +336,30 @@ private fun CommentItem(
                         horizontalArrangement = Arrangement.spacedBy(-avatarOffset / 2)
                     ) {
                         itemsIndexed(comment.likedBy) { index, author ->
-                            AsyncImage(
-                                model = author.user.avatarUrl,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(avatarSize)
-                                    .clip(avatarShape)
-                                    .thenIf(index != comment.likedBy.lastIndex) {
-                                        drawWithLayer {
-                                            drawContent()
-                                            translate(
-                                                left = drawContext.size.width - avatarOffsetPx
-                                            ) {
-                                                drawOutline(
-                                                    outline = outline,
-                                                    color = Color.Transparent,
-                                                    blendMode = BlendMode.Clear
-                                                )
-                                            }
+                            val avatarModifier = Modifier
+                                .size(avatarSize)
+                                .clip(avatarShape)
+                                .thenIf(index != comment.likedBy.lastIndex) {
+                                    drawWithLayer {
+                                        drawContent()
+                                        translate(left = drawContext.size.width - avatarOffsetPx) {
+                                            drawOutline(
+                                                outline = outline,
+                                                color = Color.Transparent,
+                                                blendMode = BlendMode.Clear
+                                            )
                                         }
                                     }
-
-                            )
+                                }
+                            if (isPreview) {
+                                Box(modifier = avatarModifier.background(MaterialTheme.colorScheme.surfaceVariant))
+                            } else {
+                                AsyncImage(
+                                    model = author.user.avatarUrl,
+                                    contentDescription = null,
+                                    modifier = avatarModifier
+                                )
+                            }
                         }
                     }
                 }
@@ -676,7 +700,7 @@ private fun WriteCommentContent(
         ) {
             TextField(
                 value = state.text,
-                onValueChange = component::editText,
+                onValueChange = { component.sendIntent(WriteCommentComponent.Intent.EditText(it)) },
                 singleLine = false,
                 maxLines = 6,
                 shape = RectangleShape,
@@ -698,7 +722,7 @@ private fun WriteCommentContent(
                 exit = fadeOut(spring()),
             ) {
                 IconButton(
-                    onClick = component::post
+                    onClick = { component.sendIntent(WriteCommentComponent.Intent.Post) }
                 ) {
                     Icon(
                         painter = painterResource(Res.drawable.ic_send),

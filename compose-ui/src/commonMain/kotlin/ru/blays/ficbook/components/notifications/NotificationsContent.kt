@@ -29,6 +29,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import ru.blays.ficbook.reader.shared.components.notificationComponents.NotificationComponent
 import ru.blays.ficbook.reader.shared.components.notificationComponents.NotificationConfirmDialogComponent
+import ru.blays.ficbook.reader.shared.data.dto.NotificationCategoryStable
 import ru.blays.ficbook.reader.shared.data.dto.NotificationModelStable
 import ru.blays.ficbook.reader.shared.data.dto.NotificationType
 import ru.blays.ficbook.utils.LocalBlurState
@@ -41,30 +42,22 @@ import ru.hh.toolbar.custom_toolbar.CollapsingToolbar
 
 @Composable
 fun NotificationsContent(component: NotificationComponent) {
+    val state by component.state.subscribeAsState()
+    val slot by component.slot.subscribeAsState()
+    val slotInstance = slot.child?.instance
+
     val lazyListState = rememberLazyListState()
 
     val canScrollBackward = lazyListState.canScrollBackward
     val canScrollForward = lazyListState.canScrollForward
 
-    val slot by component.slot.subscribeAsState()
-    val slotInstance = slot.child?.instance
-    slotInstance?.let { slotComponent ->
-        ConfirmDialogContent(slotComponent)
-    }
-
-    BoxWithConstraints {
-        if(maxWidth > 700.dp) {
-            LandscapeContent(
-                component = component,
-                lazyListState = lazyListState
-            )
-        } else {
-            PortraitContent(
-                component = component,
-                lazyListState = lazyListState
-            )
-        }
-    }
+    NotificationsContent(
+        state = state,
+        slotInstance = slotInstance,
+        onIntent = component::sendIntent,
+        onOutput = component::onOutput,
+        lazyListState = lazyListState
+    )
 
     LaunchedEffect(canScrollForward) {
         if(!canScrollForward && canScrollBackward) {
@@ -76,19 +69,50 @@ fun NotificationsContent(component: NotificationComponent) {
 }
 
 @Composable
-private fun LandscapeContent(
-    component: NotificationComponent,
+fun NotificationsContent(
+    state: NotificationComponent.State,
+    slotInstance: NotificationConfirmDialogComponent?,
+    onIntent: (NotificationComponent.Intent) -> Unit,
+    onOutput: (NotificationComponent.Output) -> Unit,
     lazyListState: LazyListState
 ) {
-    val state by component.state.subscribeAsState()
+    slotInstance?.let { slotComponent ->
+        ConfirmDialogContent(slotComponent)
+    }
 
+    BoxWithConstraints {
+        if(this.maxWidth > 700.dp) {
+            LandscapeContent(
+                state = state,
+                onIntent = onIntent,
+                onOutput = onOutput,
+                lazyListState = lazyListState
+            )
+        } else {
+            PortraitContent(
+                state = state,
+                onIntent = onIntent,
+                onOutput = onOutput,
+                lazyListState = lazyListState
+            )
+        }
+    }
+}
+
+@Composable
+private fun LandscapeContent(
+    state: NotificationComponent.State,
+    onIntent: (NotificationComponent.Intent) -> Unit,
+    onOutput: (NotificationComponent.Output) -> Unit,
+    lazyListState: LazyListState
+) {
     Scaffold(
         topBar = {
             CollapsingToolbar(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            component.onOutput(
+                            onOutput(
                                 NotificationComponent.Output.NavigateBack
                             )
                         }
@@ -131,7 +155,7 @@ private fun LandscapeContent(
                                 }
                             },
                             onClick = {
-                                component.sendIntent(
+                                onIntent(
                                     NotificationComponent.Intent.SelectCategory(category.type)
                                 )
                             }
@@ -144,12 +168,12 @@ private fun LandscapeContent(
             ) {
                 Actions(
                     onReadAll = {
-                        component.sendIntent(
+                        onIntent(
                             NotificationComponent.Intent.ReadAll
                         )
                     },
                     onDeleteAll = {
-                        component.sendIntent(
+                        onIntent(
                             NotificationComponent.Intent.DeleteAll
                         )
                     }
@@ -162,7 +186,7 @@ private fun LandscapeContent(
                         NotificationItem(
                             notification = notification
                         ) {
-                            component.onOutput(
+                            onOutput(
                                 NotificationComponent.Output.OpenNotificationHref(notification.href)
                             )
                         }
@@ -175,12 +199,12 @@ private fun LandscapeContent(
 }
 
 @Composable
-fun PortraitContent(
-    component: NotificationComponent,
+private fun PortraitContent(
+    state: NotificationComponent.State,
+    onIntent: (NotificationComponent.Intent) -> Unit,
+    onOutput: (NotificationComponent.Output) -> Unit,
     lazyListState: LazyListState
 ) {
-    val state by component.state.subscribeAsState()
-
     val blurEnabled = LocalBlurState.current
     val hazeState = remember { HazeState() }
 
@@ -195,7 +219,7 @@ fun PortraitContent(
                     navigationIcon = {
                         IconButton(
                             onClick = {
-                                component.onOutput(
+                                onOutput(
                                     NotificationComponent.Output.NavigateBack
                                 )
                             }
@@ -249,7 +273,7 @@ fun PortraitContent(
                                             }
                                         },
                                         onClick = {
-                                            component.sendIntent(
+                                            onIntent(
                                                 NotificationComponent.Intent.SelectCategory(category.type)
                                             )
                                             menuOpened = false
@@ -270,12 +294,12 @@ fun PortraitContent(
                 )
                 Actions(
                     onReadAll = {
-                        component.sendIntent(
+                        onIntent(
                             NotificationComponent.Intent.ReadAll
                         )
                     },
                     onDeleteAll = {
-                        component.sendIntent(
+                        onIntent(
                             NotificationComponent.Intent.DeleteAll
                         )
                     },
@@ -316,7 +340,7 @@ fun PortraitContent(
                     notification = notification,
                     modifier = Modifier.padding(DefaultPadding.CardDefaultPadding),
                 ) {
-                    component.onOutput(
+                    onOutput(
                         NotificationComponent.Output.OpenNotificationHref(notification.href)
                     )
                 }

@@ -7,16 +7,14 @@ import ru.blays.ficbook.reader.shared.data.SearchedFandomModel
 interface SearchFandomsComponent {
     val state: Value<State>
 
-    fun selectFandom(
-        select: Boolean,
-        fandom: SearchedFandomModel
-    )
-    fun excludeFandom(
-        exclude: Boolean,
-        fandom: SearchedFandomModel
-    )
-    fun changeSearchedName(name: String)
-    fun clear()
+    fun sendIntent(intent: Intent)
+
+    sealed class Intent {
+        data class SelectFandom(val select: Boolean, val fandom: SearchedFandomModel) : Intent()
+        data class ExcludeFandom(val exclude: Boolean, val fandom: SearchedFandomModel) : Intent()
+        data class ChangeSearchedName(val name: String) : Intent()
+        data object Clear : Intent()
+    }
 
     @Serializable
     data class State(

@@ -7,11 +7,13 @@ import ru.blays.ficbook.reader.shared.data.dto.CommentBlockModelStable
 interface WriteCommentComponent {
     val state: Value<State>
 
-    fun editText(newText: String)
+    fun sendIntent(intent: Intent)
 
-    fun addReply(blocks: List<CommentBlockModelStable>)
-
-    fun post()
+    sealed class Intent {
+        data class EditText(val newText: String) : Intent()
+        data class AddReply(val blocks: List<CommentBlockModelStable>) : Intent()
+        data object Post : Intent()
+    }
 
     @Serializable
     data class State(

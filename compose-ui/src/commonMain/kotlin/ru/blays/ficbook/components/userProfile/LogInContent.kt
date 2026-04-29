@@ -34,6 +34,20 @@ import ru.hh.toolbar.custom_toolbar.CollapsingToolbar
 @Composable
 fun LogInContent(component: UserLogInComponent) {
     val state by component.state.subscribeAsState()
+    LogInContent(
+        state = state,
+        onIntent = component::sendIntent,
+        onOutput = component::onOutput
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+internal fun LogInContent(
+    state: UserLogInComponent.State,
+    onIntent: (UserLogInComponent.Intent) -> Unit,
+    onOutput: (UserLogInComponent.Output) -> Unit
+) {
     val login = state.login
     val password = state.password
     val loading = state.loading
@@ -88,9 +102,7 @@ fun LogInContent(component: UserLogInComponent) {
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            component.onOutput(
-                                UserLogInComponent.Output.NavigateBack
-                            )
+                            onOutput(UserLogInComponent.Output.NavigateBack)
                         }
                     ) {
                         Icon(
@@ -170,9 +182,7 @@ fun LogInContent(component: UserLogInComponent) {
                     autofillTypes = listOf(AutofillType.Username),
                     value = login,
                     onValueChange = { login ->
-                        component.sendIntent(
-                            UserLogInComponent.Intent.LoginChanged(login)
-                        )
+                        onIntent(UserLogInComponent.Intent.LoginChanged(login))
                     },
                     singleLine = true,
                     label = {
@@ -190,9 +200,7 @@ fun LogInContent(component: UserLogInComponent) {
                     autofillTypes = listOf(AutofillType.Password),
                     value = password,
                     onValueChange = { password ->
-                        component.sendIntent(
-                            UserLogInComponent.Intent.PasswordChanged(password)
-                        )
+                        onIntent(UserLogInComponent.Intent.PasswordChanged(password))
                     },
                     singleLine = true,
                     label = {
@@ -236,7 +244,7 @@ fun LogInContent(component: UserLogInComponent) {
                         .height(56.dp),
                     enabled = !loading && logInButtonActive,
                     onClick = {
-                        component.sendIntent(UserLogInComponent.Intent.LogIn)
+                        onIntent(UserLogInComponent.Intent.LogIn)
                     },
                     shape = CardDefaults.shape,
                     colors = ButtonDefaults.buttonColors(

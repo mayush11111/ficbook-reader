@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,16 +38,26 @@ import java.io.File
 @Composable
 fun AccountsManagingContent(component: UserProfileManagingComponent) {
     val state by component.state.subscribeAsState()
+    AccountsManagingContent(
+        state = state,
+        onIntent = component::sendIntent,
+        onOutput = component::onOutput
+    )
+}
 
+@Composable
+internal fun AccountsManagingContent(
+    state: UserProfileManagingComponent.State,
+    onIntent: (UserProfileManagingComponent.Intent) -> Unit,
+    onOutput: (UserProfileManagingComponent.Output) -> Unit
+) {
     Scaffold(
         topBar = {
             CollapsingToolbar(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            component.onOutput(
-                                UserProfileManagingComponent.Output.NavigateBack
-                            )
+                            onOutput(UserProfileManagingComponent.Output.NavigateBack)
                         }
                     ) {
                         Icon(
@@ -74,14 +85,10 @@ fun AccountsManagingContent(component: UserProfileManagingComponent) {
                         user = user,
                         selected = user.id == state.selectedUserID,
                         onSelect = {
-                            component.sendIntent(
-                                UserProfileManagingComponent.Intent.ChangeUser(user.id)
-                            )
+                            onIntent(UserProfileManagingComponent.Intent.ChangeUser(user.id))
                         },
                         onDelete = {
-                            component.sendIntent(
-                                UserProfileManagingComponent.Intent.DeleteUser(user.id)
-                            )
+                            onIntent(UserProfileManagingComponent.Intent.DeleteUser(user.id))
                         }
                     )
                 }
@@ -89,9 +96,7 @@ fun AccountsManagingContent(component: UserProfileManagingComponent) {
             Button(
                 shape = MaterialTheme.shapes.medium,
                 onClick = {
-                    component.sendIntent(
-                        UserProfileManagingComponent.Intent.AddNewAccount
-                    )
+                    onIntent(UserProfileManagingComponent.Intent.AddNewAccount)
                 },
                 modifier = Modifier
                     .height(44.dp)
@@ -158,6 +163,7 @@ fun UserCardContent(
     user: SavedUserModel,
     onDelete: () -> Unit
 ) {
+    val isPreview = LocalInspectionMode.current
     val avatarShape = SquircleShape(
         cornerSmoothing = CornerSmoothing.High
     )
@@ -171,25 +177,34 @@ fun UserCardContent(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        SubcomposeAsyncImage(
-            model = File(user.avatarPath),
-            contentDescription = stringResource(Res.string.content_description_icon_author_avatar),
-            contentScale = ContentScale.Crop,
-            success = { state ->
-                Image(
-                    painter = state.painter,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            color = imageContainerColor
-                        )
-                )
-            },
-            modifier = Modifier
-                .size(65.dp)
-                .clip(avatarShape)
-        )
+        if (isPreview) {
+            Box(
+                modifier = Modifier
+                    .size(65.dp)
+                    .clip(avatarShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            )
+        } else {
+            SubcomposeAsyncImage(
+                model = File(user.avatarPath),
+                contentDescription = stringResource(Res.string.content_description_icon_author_avatar),
+                contentScale = ContentScale.Crop,
+                success = { state ->
+                    Image(
+                        painter = state.painter,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                color = imageContainerColor
+                            )
+                    )
+                },
+                modifier = Modifier
+                    .size(65.dp)
+                    .clip(avatarShape)
+            )
+        }
         Spacer(modifier = Modifier.requiredWidth(12.dp))
         Column(
             modifier = Modifier.weight(1F),

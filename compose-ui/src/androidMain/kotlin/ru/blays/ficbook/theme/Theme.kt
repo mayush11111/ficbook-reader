@@ -1,5 +1,6 @@
 package ru.blays.ficbook.theme
 
+import android.R
 import android.app.Activity
 import android.os.Build
 import androidx.compose.animation.core.AnimationSpec
@@ -20,18 +21,16 @@ import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamicColorScheme
 import ru.blays.ficbook.reader.shared.components.themeComponents.ThemeComponent
 
+
 @Composable
-actual fun AppTheme(
-    component: ThemeComponent,
+fun AppTheme(
+    themeIndex: Int = 0,
+    isAmoledTheme: Boolean = false,
+    colorAccentIndex: Int = 0,
+    monetTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-
-    val state by component.state.subscribeAsState()
-    val themeIndex = state.themeIndex
-    val isAmoledTheme = state.amoledTheme
-    val colorAccentIndex = state.defaultAccentIndex
-    val monetTheme = state.dynamicColors
 
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val darkTheme = when(themeIndex) {
@@ -118,21 +117,23 @@ actual fun AppTheme(
 
     val view = LocalView.current
 
-    LaunchedEffect(darkTheme) {
-        val window = (view.context as Activity).window
 
-        val transparentColor = Color.Transparent.toArgb()
-        window.statusBarColor = transparentColor
-        window.navigationBarColor = transparentColor
+    if (!view.isInEditMode)
+        LaunchedEffect(darkTheme) {
+            val window = (view.context as Activity).window
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.isNavigationBarContrastEnforced = false
+            val transparentColor = Color.Transparent.toArgb()
+            window.statusBarColor = transparentColor
+            window.navigationBarColor = transparentColor
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
+
+            val windowsInsetsController = WindowCompat.getInsetsController(window, view)
+            windowsInsetsController.isAppearanceLightStatusBars = !darkTheme
+            windowsInsetsController.isAppearanceLightNavigationBars = !darkTheme
         }
-
-        val windowsInsetsController = WindowCompat.getInsetsController(window, view)
-        windowsInsetsController.isAppearanceLightStatusBars = !darkTheme
-        windowsInsetsController.isAppearanceLightNavigationBars = !darkTheme
-    }
 
     val rippleConfiguration = createRippleConfig(animatedColorScheme.primary, darkTheme)
 
@@ -146,6 +147,21 @@ actual fun AppTheme(
             )
         },
         typography = Typography
+    )
+}
+
+@Composable
+actual fun AppTheme(
+    component: ThemeComponent,
+    content: @Composable () -> Unit
+) {
+    val state by component.state.subscribeAsState()
+    AppTheme(
+        themeIndex = state.themeIndex,
+        isAmoledTheme = state.amoledTheme,
+        colorAccentIndex = state.defaultAccentIndex,
+        monetTheme = state.dynamicColors,
+        content = content
     )
 }
 

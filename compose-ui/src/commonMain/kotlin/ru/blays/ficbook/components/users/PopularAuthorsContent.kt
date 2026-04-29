@@ -8,11 +8,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -68,19 +70,25 @@ private fun AuthorItem(
         onClick = onAuthorClick,
         modifier = Modifier.padding(DefaultPadding.CardDefaultPadding),
     ) {
+        val isPreview = LocalInspectionMode.current
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = author.user.avatarUrl,
-                contentDescription = stringResource(Res.string.content_description_icon_author_avatar),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(0.2F)
-                    .clip(CircleShape)
-            )
+            val avatarMod = Modifier
+                .padding(10.dp)
+                .fillMaxWidth(0.2F)
+                .clip(CircleShape)
+            if (isPreview) {
+                Box(modifier = avatarMod.background(MaterialTheme.colorScheme.surfaceVariant))
+            } else {
+                AsyncImage(
+                    model = author.user.avatarUrl,
+                    contentDescription = stringResource(Res.string.content_description_icon_author_avatar),
+                    contentScale = ContentScale.Crop,
+                    modifier = avatarMod
+                )
+            }
             Column(
                 modifier = Modifier
                     .padding(

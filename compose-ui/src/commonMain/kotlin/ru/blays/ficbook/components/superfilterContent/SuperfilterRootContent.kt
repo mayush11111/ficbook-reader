@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.pages.ChildPages
 import com.arkivanov.decompose.extensions.compose.pages.PagesScrollAnimation
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
+import com.arkivanov.decompose.router.pages.ChildPages as DecomposeChildPages
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
@@ -42,6 +43,15 @@ import ru.hh.toolbar.custom_toolbar.CollapsingToolbar
 @Composable
 fun SuperfilterRootContent(component: SuperfilterComponent) {
     val pages by component.pages.subscribeAsState()
+    SuperfilterRootContent(pages, component::changeTab, component::onOutput)
+}
+
+@Composable
+internal fun SuperfilterRootContent(
+    pages: DecomposeChildPages<Int, SuperfilterTabComponent>,
+    onChangeTab: (Int) -> Unit,
+    onOutput: (SuperfilterComponent.Output) -> Unit,
+) {
     val currentPage = with(pages) { items[selectedIndex] }
 
     val windowSize = WindowSize()
@@ -62,9 +72,7 @@ fun SuperfilterRootContent(component: SuperfilterComponent) {
                     navigationIcon = {
                         IconButton(
                             onClick = {
-                                component.onOutput(
-                                    SuperfilterComponent.Output.NavigateBack
-                                )
+                                onOutput(SuperfilterComponent.Output.NavigateBack)
                             }
                         ) {
                             Icon(
@@ -82,7 +90,7 @@ fun SuperfilterRootContent(component: SuperfilterComponent) {
                 )
                 TabsRow(
                     selectedTab = pages.selectedIndex,
-                    onTabSelected = component::changeTab
+                    onTabSelected = onChangeTab
                 )
             }
         },
@@ -110,7 +118,7 @@ fun SuperfilterRootContent(component: SuperfilterComponent) {
                 .fillMaxWidth(widthFraction)
                 .padding(padding),
             pages = pages,
-            onPageSelected = component::changeTab,
+            onPageSelected = onChangeTab,
             scrollAnimation = PagesScrollAnimation.Default
         ) { _, page ->
             Page(page)

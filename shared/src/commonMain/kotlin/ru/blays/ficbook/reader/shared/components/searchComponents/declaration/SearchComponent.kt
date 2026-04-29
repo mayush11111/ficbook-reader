@@ -14,27 +14,27 @@ interface SearchComponent {
     val searchCharactersComponent: SearchPairingsComponent
     val savedSearchesComponent: SearchSaveComponent
 
-    fun search()
-    fun clear()
+    fun sendIntent(intent: Intent)
 
-    /**
-    * Fun's for change search params
-    **/
-    fun setSearchOriginals(value: Boolean)
-    fun setSearchFanfics(value: Boolean)
-    fun setPagesCountRange(value: IntRangeSimple)
-    fun setStatus(value: List<Int>)
-    fun setRating(value: List<Int>)
-    fun setDirection(value: List<Int>)
-    fun setOnlyTranslations(value: Boolean)
-    fun setOnlyPremium(value: Boolean)
-    fun setLikesRange(value: IntRangeSimple)
-    fun setMinRewards(value: Int)
-    fun setMinComments(value: Int)
-    fun setDateRange(value: LongRange)
-    fun setTitle(value: String)
-    fun setFilterReaded(value: Boolean)
-    fun setSort(value: Int)
+    sealed class Intent {
+        data object Search : Intent()
+        data object Clear : Intent()
+        data class SetTitle(val value: String) : Intent()
+        data class SetSearchOriginals(val value: Boolean) : Intent()
+        data class SetSearchFanfics(val value: Boolean) : Intent()
+        data class SetPagesCountRange(val value: IntRangeSimple) : Intent()
+        data class SetStatus(val value: List<Int>) : Intent()
+        data class SetRating(val value: List<Int>) : Intent()
+        data class SetDirection(val value: List<Int>) : Intent()
+        data class SetOnlyTranslations(val value: Boolean) : Intent()
+        data class SetOnlyPremium(val value: Boolean) : Intent()
+        data class SetLikesRange(val value: IntRangeSimple) : Intent()
+        data class SetMinRewards(val value: Int) : Intent()
+        data class SetMinComments(val value: Int) : Intent()
+        data class SetDateRange(val value: LongRange) : Intent()
+        data class SetFilterReaded(val value: Boolean) : Intent()
+        data class SetSort(val value: Int) : Intent()
+    }
 
     sealed class Output {
         data object NavigateBack: Output()

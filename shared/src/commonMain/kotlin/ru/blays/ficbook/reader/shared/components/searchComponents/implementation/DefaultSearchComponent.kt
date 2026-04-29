@@ -52,104 +52,36 @@ class DefaultSearchComponent(
         createEntity = ::createSearchParamsEntity
     )
 
-    override fun search() {
+    override fun sendIntent(intent: SearchComponent.Intent) {
+        when (intent) {
+            SearchComponent.Intent.Search -> handleSearch()
+            SearchComponent.Intent.Clear -> handleClear()
+            is SearchComponent.Intent.SetTitle -> _state.update { it.copy(title = intent.value) }
+            is SearchComponent.Intent.SetSearchOriginals -> _state.update { it.copy(searchOriginals = intent.value) }
+            is SearchComponent.Intent.SetSearchFanfics -> _state.update { it.copy(searchFanfics = intent.value) }
+            is SearchComponent.Intent.SetPagesCountRange -> _state.update { it.copy(pagesCountRange = intent.value) }
+            is SearchComponent.Intent.SetStatus -> _state.update { it.copy(withStatus = intent.value) }
+            is SearchComponent.Intent.SetRating -> _state.update { it.copy(withRating = intent.value) }
+            is SearchComponent.Intent.SetDirection -> _state.update { it.copy(withDirection = intent.value) }
+            is SearchComponent.Intent.SetOnlyTranslations -> _state.update { it.copy(onlyTranslations = intent.value) }
+            is SearchComponent.Intent.SetOnlyPremium -> _state.update { it.copy(onlyPremium = intent.value) }
+            is SearchComponent.Intent.SetLikesRange -> _state.update { it.copy(likesRange = intent.value) }
+            is SearchComponent.Intent.SetMinRewards -> _state.update { it.copy(minRewards = intent.value) }
+            is SearchComponent.Intent.SetMinComments -> _state.update { it.copy(minComments = intent.value) }
+            is SearchComponent.Intent.SetDateRange -> _state.update { it.copy(dateRange = intent.value) }
+            is SearchComponent.Intent.SetFilterReaded -> _state.update { it.copy(filterReaded = intent.value) }
+            is SearchComponent.Intent.SetSort -> _state.update { it.copy(sort = intent.value) }
+        }
+    }
+
+    private fun handleSearch() {
         _fanficsListComponent.setSection(
             section = buildSection()
         )
     }
 
-    override fun clear() {
+    private fun handleClear() {
         _state.update { SearchParams.Default }
-    }
-
-    override fun setSearchOriginals(value: Boolean) {
-        _state.update {
-            it.copy(searchOriginals = value)
-        }
-    }
-
-    override fun setSearchFanfics(value: Boolean) {
-        _state.update {
-            it.copy(searchFanfics = value)
-        }
-    }
-
-    override fun setPagesCountRange(value: IntRangeSimple) {
-        _state.update {
-            it.copy(pagesCountRange = value)
-        }
-    }
-
-    override fun setStatus(value: List<Int>) {
-        _state.update {
-            it.copy(withStatus = value)
-        }
-    }
-
-    override fun setRating(value: List<Int>) {
-        _state.update {
-            it.copy(withRating = value)
-        }
-    }
-
-    override fun setDirection(value: List<Int>) {
-        _state.update {
-            it.copy(withDirection = value)
-        }
-    }
-
-    override fun setOnlyTranslations(value: Boolean) {
-        _state.update {
-            it.copy(onlyTranslations = value)
-        }
-    }
-
-    override fun setOnlyPremium(value: Boolean) {
-        _state.update {
-            it.copy(onlyPremium = value)
-        }
-    }
-
-    override fun setLikesRange(value: IntRangeSimple) {
-        _state.update {
-            it.copy(likesRange = value)
-        }
-    }
-
-    override fun setMinRewards(value: Int) {
-        _state.update {
-            it.copy(minRewards = value)
-        }
-    }
-
-    override fun setMinComments(value: Int) {
-        _state.update {
-            it.copy(minComments = value)
-        }
-    }
-
-    override fun setDateRange(value: LongRange) {
-        _state.update {
-            it.copy(dateRange = value)
-        }
-    }
-
-    override fun setTitle(value: String) {
-        _state.update {
-            it.copy(title = value)
-        }
-    }
-
-    override fun setFilterReaded(value: Boolean) {
-        _state.update {
-            it.copy(filterReaded = value)
-        }
-    }
-
-    override fun setSort(value: Int) {
-        _state.update {
-            it.copy(sort = value)
-        }
     }
 
     private fun buildSection(): SectionWithQuery {

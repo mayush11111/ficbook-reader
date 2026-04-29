@@ -38,6 +38,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import ru.blays.ficbook.components.fanficsList.FanficsListContent
 import ru.blays.ficbook.platformUtils.BackHandler
+import ru.blays.ficbook.reader.shared.components.fanficListComponents.declaration.FanficQuickActionsComponent
 import ru.blays.ficbook.reader.shared.components.fanficListComponents.declaration.FanficsListComponent
 import ru.blays.ficbook.reader.shared.components.searchComponents.declaration.*
 import ru.blays.ficbook.reader.shared.data.*
@@ -63,17 +64,90 @@ import ru.hh.toolbar.custom_toolbar.CollapsingToolbar
 
 @Composable
 fun SearchContent(component: SearchComponent) {
+    val state by component.state.subscribeAsState()
+    val fandomsState by component.searchFandomsComponent.state.subscribeAsState()
+    val tagsState by component.searchTagsComponent.state.subscribeAsState()
+    val pairingsState by component.searchCharactersComponent.state.subscribeAsState()
+    val savedState by component.savedSearchesComponent.state.subscribeAsState()
+    val fanficsListState by component.fanficsListComponent.state.subscribeAsState()
+    SearchContent(
+        state = state,
+        onSearchIntent = component::sendIntent,
+        fandomsState = fandomsState,
+        onFandomsIntent = component.searchFandomsComponent::sendIntent,
+        tagsState = tagsState,
+        onTagsIntent = component.searchTagsComponent::sendIntent,
+        pairingsState = pairingsState,
+        defaultCharacterModifiers = component.searchCharactersComponent.defaultCharacterModifiers,
+        onPairingsIntent = component.searchCharactersComponent::sendIntent,
+        savedState = savedState,
+        onSavedIntent = component.savedSearchesComponent::sendIntent,
+        fanficsListState = fanficsListState,
+        onFanficsIntent = component.fanficsListComponent::sendIntent,
+        onFanficsOutput = component.fanficsListComponent::onOutput,
+        quickActionsFactory = component.fanficsListComponent::getQuickActionsComponent,
+    )
+}
+
+@Composable
+internal fun SearchContent(
+    state: SearchParams,
+    onSearchIntent: (SearchComponent.Intent) -> Unit,
+    fandomsState: SearchFandomsComponent.State,
+    onFandomsIntent: (SearchFandomsComponent.Intent) -> Unit,
+    tagsState: SearchTagsComponent.State,
+    onTagsIntent: (SearchTagsComponent.Intent) -> Unit,
+    pairingsState: SearchPairingsComponent.State,
+    defaultCharacterModifiers: Array<String>,
+    onPairingsIntent: (SearchPairingsComponent.Intent) -> Unit,
+    savedState: SearchSaveComponent.State,
+    onSavedIntent: (SearchSaveComponent.Intent) -> Unit,
+    fanficsListState: FanficsListComponent.State,
+    onFanficsIntent: (FanficsListComponent.Intent) -> Unit,
+    onFanficsOutput: (FanficsListComponent.Output) -> Unit,
+    quickActionsFactory: (fanficID: String, fanficName: String) -> FanficQuickActionsComponent,
+) {
     BoxWithConstraints {
         if (maxWidth > 600.dp) {
-            LandscapeContent(component)
+            LandscapeContent(
+                state, onSearchIntent,
+                fandomsState, onFandomsIntent,
+                tagsState, onTagsIntent,
+                pairingsState, defaultCharacterModifiers, onPairingsIntent,
+                savedState, onSavedIntent,
+                fanficsListState, onFanficsIntent, onFanficsOutput, quickActionsFactory,
+            )
         } else {
-            PortraitContent(component)
+            PortraitContent(
+                state, onSearchIntent,
+                fandomsState, onFandomsIntent,
+                tagsState, onTagsIntent,
+                pairingsState, defaultCharacterModifiers, onPairingsIntent,
+                savedState, onSavedIntent,
+                fanficsListState, onFanficsIntent, onFanficsOutput, quickActionsFactory,
+            )
         }
     }
 }
 
 @Composable
-private fun LandscapeContent(component: SearchComponent) {
+private fun LandscapeContent(
+    state: SearchParams,
+    onSearchIntent: (SearchComponent.Intent) -> Unit,
+    fandomsState: SearchFandomsComponent.State,
+    onFandomsIntent: (SearchFandomsComponent.Intent) -> Unit,
+    tagsState: SearchTagsComponent.State,
+    onTagsIntent: (SearchTagsComponent.Intent) -> Unit,
+    pairingsState: SearchPairingsComponent.State,
+    defaultCharacterModifiers: Array<String>,
+    onPairingsIntent: (SearchPairingsComponent.Intent) -> Unit,
+    savedState: SearchSaveComponent.State,
+    onSavedIntent: (SearchSaveComponent.Intent) -> Unit,
+    fanficsListState: FanficsListComponent.State,
+    onFanficsIntent: (FanficsListComponent.Intent) -> Unit,
+    onFanficsOutput: (FanficsListComponent.Output) -> Unit,
+    quickActionsFactory: (fanficID: String, fanficName: String) -> FanficQuickActionsComponent,
+) {
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(DrawerValue.Open)
 
@@ -84,9 +158,7 @@ private fun LandscapeContent(component: SearchComponent) {
 
     BackHandler(true) {
         if (drawerState.currentValue == DrawerValue.Open) {
-            component.fanficsListComponent.onOutput(
-                FanficsListComponent.Output.NavigateBack
-            )
+            onFanficsOutput(FanficsListComponent.Output.NavigateBack)
         } else {
             coroutineScope.launch {
                 drawerState.open()
@@ -100,9 +172,7 @@ private fun LandscapeContent(component: SearchComponent) {
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            component.fanficsListComponent.onOutput(
-                                FanficsListComponent.Output.NavigateBack
-                            )
+                            onFanficsOutput(FanficsListComponent.Output.NavigateBack)
                         }
                     ) {
                         Icon(
@@ -158,7 +228,17 @@ private fun LandscapeContent(component: SearchComponent) {
                         .padding(top = padding.calculateTopPadding()),
                 ) {
                     SearchMenuRoot(
-                        component = component,
+                        state = state,
+                        onSearchIntent = onSearchIntent,
+                        fandomsState = fandomsState,
+                        onFandomsIntent = onFandomsIntent,
+                        tagsState = tagsState,
+                        onTagsIntent = onTagsIntent,
+                        pairingsState = pairingsState,
+                        defaultCharacterModifiers = defaultCharacterModifiers,
+                        onPairingsIntent = onPairingsIntent,
+                        savedState = savedState,
+                        onSavedIntent = onSavedIntent,
                         modifier = Modifier
                             .padding(DefaultPadding.CardDefaultPadding)
                             .fillMaxWidth(0.4F),
@@ -176,7 +256,10 @@ private fun LandscapeContent(component: SearchComponent) {
             }
         ) {
             FanficsListContent(
-                component = component.fanficsListComponent,
+                state = fanficsListState,
+                onIntent = onFanficsIntent,
+                onOutput = onFanficsOutput,
+                quickActionsFactory = quickActionsFactory,
                 lazyListState = lazyListState,
                 contentPadding = padding
             )
@@ -185,7 +268,23 @@ private fun LandscapeContent(component: SearchComponent) {
 }
 
 @Composable
-private fun PortraitContent(component: SearchComponent) {
+private fun PortraitContent(
+    state: SearchParams,
+    onSearchIntent: (SearchComponent.Intent) -> Unit,
+    fandomsState: SearchFandomsComponent.State,
+    onFandomsIntent: (SearchFandomsComponent.Intent) -> Unit,
+    tagsState: SearchTagsComponent.State,
+    onTagsIntent: (SearchTagsComponent.Intent) -> Unit,
+    pairingsState: SearchPairingsComponent.State,
+    defaultCharacterModifiers: Array<String>,
+    onPairingsIntent: (SearchPairingsComponent.Intent) -> Unit,
+    savedState: SearchSaveComponent.State,
+    onSavedIntent: (SearchSaveComponent.Intent) -> Unit,
+    fanficsListState: FanficsListComponent.State,
+    onFanficsIntent: (FanficsListComponent.Intent) -> Unit,
+    onFanficsOutput: (FanficsListComponent.Output) -> Unit,
+    quickActionsFactory: (fanficID: String, fanficName: String) -> FanficQuickActionsComponent,
+) {
     val bottomSheetState = rememberSheetState(
         skipPartiallyExpanded = false,
         initialValue = SheetValue.Expanded
@@ -200,9 +299,7 @@ private fun PortraitContent(component: SearchComponent) {
 
     BackHandler(true) {
         if (bottomSheetState.currentValue == SheetValue.Expanded) {
-            component.fanficsListComponent.onOutput(
-                FanficsListComponent.Output.NavigateBack
-            )
+            onFanficsOutput(FanficsListComponent.Output.NavigateBack)
         } else {
             coroutineScope.launch {
                 bottomSheetState.expand()
@@ -215,7 +312,17 @@ private fun PortraitContent(component: SearchComponent) {
         sheetPeekHeight = 0.dp,
         sheetContent = {
             SearchMenuRoot(
-                component = component,
+                state = state,
+                onSearchIntent = onSearchIntent,
+                fandomsState = fandomsState,
+                onFandomsIntent = onFandomsIntent,
+                tagsState = tagsState,
+                onTagsIntent = onTagsIntent,
+                pairingsState = pairingsState,
+                defaultCharacterModifiers = defaultCharacterModifiers,
+                onPairingsIntent = onPairingsIntent,
+                savedState = savedState,
+                onSavedIntent = onSavedIntent,
                 modifier = Modifier
                     .systemBarsPadding()
                     .padding(DefaultPadding.CardDefaultPadding),
@@ -231,9 +338,7 @@ private fun PortraitContent(component: SearchComponent) {
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            component.fanficsListComponent.onOutput(
-                                FanficsListComponent.Output.NavigateBack
-                            )
+                            onFanficsOutput(FanficsListComponent.Output.NavigateBack)
                         }
                     ) {
                         Icon(
@@ -275,7 +380,10 @@ private fun PortraitContent(component: SearchComponent) {
         scaffoldState = bottomSheetScaffoldState,
     ) { padding ->
         FanficsListContent(
-            component = component.fanficsListComponent,
+            state = fanficsListState,
+            onIntent = onFanficsIntent,
+            onOutput = onFanficsOutput,
+            quickActionsFactory = quickActionsFactory,
             lazyListState = lazyListState,
             contentPadding = padding,
             modifier = Modifier.thenIf(blurEnabled) {
@@ -286,8 +394,46 @@ private fun PortraitContent(component: SearchComponent) {
 }
 
 @Composable
-private fun SearchMenuRoot(
+internal fun SearchMenuRoot(
     component: SearchComponent,
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit = {},
+) {
+    val state by component.state.subscribeAsState()
+    val fandomsState by component.searchFandomsComponent.state.subscribeAsState()
+    val tagsState by component.searchTagsComponent.state.subscribeAsState()
+    val pairingsState by component.searchCharactersComponent.state.subscribeAsState()
+    val savedState by component.savedSearchesComponent.state.subscribeAsState()
+    SearchMenuRoot(
+        state = state,
+        onSearchIntent = component::sendIntent,
+        fandomsState = fandomsState,
+        onFandomsIntent = component.searchFandomsComponent::sendIntent,
+        tagsState = tagsState,
+        onTagsIntent = component.searchTagsComponent::sendIntent,
+        pairingsState = pairingsState,
+        defaultCharacterModifiers = component.searchCharactersComponent.defaultCharacterModifiers,
+        onPairingsIntent = component.searchCharactersComponent::sendIntent,
+        savedState = savedState,
+        onSavedIntent = component.savedSearchesComponent::sendIntent,
+        modifier = modifier,
+        onDismissRequest = onDismissRequest,
+    )
+}
+
+@Composable
+internal fun SearchMenuRoot(
+    state: SearchParams,
+    onSearchIntent: (SearchComponent.Intent) -> Unit,
+    fandomsState: SearchFandomsComponent.State,
+    onFandomsIntent: (SearchFandomsComponent.Intent) -> Unit,
+    tagsState: SearchTagsComponent.State,
+    onTagsIntent: (SearchTagsComponent.Intent) -> Unit,
+    pairingsState: SearchPairingsComponent.State,
+    defaultCharacterModifiers: Array<String>,
+    onPairingsIntent: (SearchPairingsComponent.Intent) -> Unit,
+    savedState: SearchSaveComponent.State,
+    onSavedIntent: (SearchSaveComponent.Intent) -> Unit,
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit = {},
 ) {
@@ -345,14 +491,25 @@ private fun SearchMenuRoot(
             when (page) {
                 0 -> {
                     SearchParamsSelector(
-                        component = component,
-                        onDismissRequest = onDismissRequest
+                        state = state,
+                        onSearchIntent = onSearchIntent,
+                        fandomsState = fandomsState,
+                        onFandomsIntent = onFandomsIntent,
+                        tagsState = tagsState,
+                        onTagsIntent = onTagsIntent,
+                        pairingsState = pairingsState,
+                        defaultCharacterModifiers = defaultCharacterModifiers,
+                        onPairingsIntent = onPairingsIntent,
+                        savedState = savedState,
+                        onSavedIntent = onSavedIntent,
+                        onDismissRequest = onDismissRequest,
                     )
                 }
 
                 1 -> {
                     SavedSearches(
-                        component = component.savedSearchesComponent,
+                        state = savedState,
+                        onIntent = onSavedIntent,
                         onBack = { scope.launch { pagerState.animateScrollToPage(0) } }
                     )
                 }
@@ -368,8 +525,44 @@ fun SearchParamsSelector(
     onDismissRequest: () -> Unit = {},
 ) {
     val state by component.state.subscribeAsState()
-    val scrollState = rememberScrollState()
     val fandomsState by component.searchFandomsComponent.state.subscribeAsState()
+    val tagsState by component.searchTagsComponent.state.subscribeAsState()
+    val pairingsState by component.searchCharactersComponent.state.subscribeAsState()
+    val savedState by component.savedSearchesComponent.state.subscribeAsState()
+    SearchParamsSelector(
+        state = state,
+        onSearchIntent = component::sendIntent,
+        fandomsState = fandomsState,
+        onFandomsIntent = component.searchFandomsComponent::sendIntent,
+        tagsState = tagsState,
+        onTagsIntent = component.searchTagsComponent::sendIntent,
+        pairingsState = pairingsState,
+        defaultCharacterModifiers = component.searchCharactersComponent.defaultCharacterModifiers,
+        onPairingsIntent = component.searchCharactersComponent::sendIntent,
+        savedState = savedState,
+        onSavedIntent = component.savedSearchesComponent::sendIntent,
+        modifier = modifier,
+        onDismissRequest = onDismissRequest,
+    )
+}
+
+@Composable
+internal fun SearchParamsSelector(
+    state: SearchParams,
+    onSearchIntent: (SearchComponent.Intent) -> Unit,
+    fandomsState: SearchFandomsComponent.State,
+    onFandomsIntent: (SearchFandomsComponent.Intent) -> Unit,
+    tagsState: SearchTagsComponent.State,
+    onTagsIntent: (SearchTagsComponent.Intent) -> Unit,
+    pairingsState: SearchPairingsComponent.State,
+    defaultCharacterModifiers: Array<String>,
+    onPairingsIntent: (SearchPairingsComponent.Intent) -> Unit,
+    savedState: SearchSaveComponent.State,
+    onSavedIntent: (SearchSaveComponent.Intent) -> Unit,
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit = {},
+) {
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = modifier
@@ -383,7 +576,7 @@ fun SearchParamsSelector(
             OutlinedTextField(
                 value = state.title,
                 onValueChange = {
-                    component.setTitle(it)
+                    onSearchIntent(SearchComponent.Intent.SetTitle(it))
                 },
                 label = {
                     Text(text = stringResource(Res.string.search_by_name))
@@ -391,7 +584,7 @@ fun SearchParamsSelector(
                 trailingIcon = {
                     IconButton(
                         onClick = {
-                            component.setTitle("")
+                            onSearchIntent(SearchComponent.Intent.SetTitle(""))
                         }
                     ) {
                         Icon(
@@ -409,13 +602,13 @@ fun SearchParamsSelector(
             CheckboxWithTitle(
                 checked = state.searchOriginals,
                 title = stringResource(Res.string.search_originals),
-                onClick = component::setSearchOriginals
+                onClick = { onSearchIntent(SearchComponent.Intent.SetSearchOriginals(it)) }
             )
             VerticalCategorySpacer()
             CheckboxWithTitle(
                 checked = state.searchFanfics,
                 title = stringResource(Res.string.search_fanfics),
-                onClick = component::setSearchFanfics
+                onClick = { onSearchIntent(SearchComponent.Intent.SetSearchFanfics(it)) }
             )
             VerticalCategorySpacer()
             AnimatedVisibility(
@@ -423,7 +616,7 @@ fun SearchParamsSelector(
                 enter = expandVertically(spring()),
                 exit = shrinkVertically(spring())
             ) {
-                FandomsSelector(component = component.searchFandomsComponent)
+                FandomsSelector(fandomsState, onFandomsIntent)
                 VerticalCategorySpacer()
             }
 
@@ -438,75 +631,73 @@ fun SearchParamsSelector(
                 enter = expandVertically(spring()),
                 exit = shrinkVertically(spring())
             ) {
-                PairingSelector(component.searchCharactersComponent)
+                PairingSelector(pairingsState, defaultCharacterModifiers, onPairingsIntent)
             }
-            TagsSelector(
-                component = component.searchTagsComponent,
-            )
+            TagsSelector(tagsState, onTagsIntent)
             VerticalCategorySpacer()
             PagesRangeSelector(
                 value = state.pagesCountRange,
-                onSelect = component::setPagesCountRange
+                onSelect = { onSearchIntent(SearchComponent.Intent.SetPagesCountRange(it)) }
             )
             VerticalCategorySpacer()
             StatusSelector(
                 value = state.withStatus,
-                onSelect = component::setStatus
+                onSelect = { onSearchIntent(SearchComponent.Intent.SetStatus(it)) }
             )
             VerticalCategorySpacer()
             RatingSelector(
                 value = state.withRating,
-                onSelect = component::setRating
+                onSelect = { onSearchIntent(SearchComponent.Intent.SetRating(it)) }
             )
             VerticalCategorySpacer()
             DirectionSelector(
                 value = state.withDirection,
-                onSelect = component::setDirection
+                onSelect = { onSearchIntent(SearchComponent.Intent.SetDirection(it)) }
             )
             VerticalCategorySpacer()
             LikesRangeSelector(
                 value = state.likesRange,
-                onSelect = component::setLikesRange
+                onSelect = { onSearchIntent(SearchComponent.Intent.SetLikesRange(it)) }
             )
             VerticalCategorySpacer()
             RewardsCountSelector(
                 value = state.minRewards,
-                onSelect = component::setMinRewards
+                onSelect = { onSearchIntent(SearchComponent.Intent.SetMinRewards(it)) }
             )
             VerticalCategorySpacer()
             CommentsCountSelector(
                 value = state.minComments,
-                onSelect = component::setMinComments
+                onSelect = { onSearchIntent(SearchComponent.Intent.SetMinComments(it)) }
             )
             VerticalCategorySpacer()
             CheckboxWithTitle(
                 checked = state.onlyTranslations,
                 title = stringResource(Res.string.only_translations),
-                onClick = component::setOnlyTranslations
+                onClick = { onSearchIntent(SearchComponent.Intent.SetOnlyTranslations(it)) }
             )
             VerticalCategorySpacer()
             CheckboxWithTitle(
                 checked = state.onlyPremium,
                 title = stringResource(Res.string.search_selector_hot_works),
-                onClick = component::setOnlyPremium
+                onClick = { onSearchIntent(SearchComponent.Intent.SetOnlyPremium(it)) }
             )
             VerticalCategorySpacer()
             CheckboxWithTitle(
                 checked = state.filterReaded,
                 title = stringResource(Res.string.search_selector_dont_show_readed),
-                onClick = component::setFilterReaded
+                onClick = { onSearchIntent(SearchComponent.Intent.SetFilterReaded(it)) }
             )
             VerticalCategorySpacer()
             SortTypeSelector(
                 value = state.sort,
-                onSelect = component::setSort
+                onSelect = { onSearchIntent(SearchComponent.Intent.SetSort(it)) }
             )
             VerticalCategorySpacer()
         }
         BottomButtonContent(
-            component = component.savedSearchesComponent,
+            onSavedIntent = onSavedIntent,
             onSearchClick = {
-                component.search()
+                onSearchIntent(SearchComponent.Intent.Search)
                 onDismissRequest()
             }
         )
@@ -516,10 +707,10 @@ fun SearchParamsSelector(
 @Composable
 private fun SavedSearches(
     modifier: Modifier = Modifier,
-    component: SearchSaveComponent,
+    state: SearchSaveComponent.State,
+    onIntent: (SearchSaveComponent.Intent) -> Unit,
     onBack: () -> Unit,
 ) {
-    val state by component.state.subscribeAsState()
     Column {
         LazyColumn(
             modifier = modifier,
@@ -528,19 +719,14 @@ private fun SavedSearches(
                 SavedSearchItem(
                     shortcut = shortcut,
                     onSelect = {
-                        component.select(shortcut)
+                        onIntent(SearchSaveComponent.Intent.Select(shortcut))
                         onBack()
                     },
                     onDelete = {
-                        component.delete(shortcut)
+                        onIntent(SearchSaveComponent.Intent.Delete(shortcut))
                     },
                     onUpdate = { name, description, updateParams ->
-                        component.update(
-                            shortcut,
-                            name,
-                            description,
-                            updateParams
-                        )
+                        onIntent(SearchSaveComponent.Intent.Update(shortcut, name, description, updateParams))
                     }
                 )
                 Spacer(modifier = Modifier.height(6.dp))
@@ -710,13 +896,13 @@ private fun SavedSearchItem(
 
 @Composable
 private fun FandomsSelector(
-    component: SearchFandomsComponent,
+    state: SearchFandomsComponent.State,
+    onIntent: (SearchFandomsComponent.Intent) -> Unit,
 ) {
-    val state by component.state.subscribeAsState()
-
+    val isPreview = androidx.compose.ui.platform.LocalInspectionMode.current
     var chipExpanded by rememberSaveable { mutableStateOf(false) }
 
-    var selectIncludedFandomDialogVisible by remember { mutableStateOf(false) }
+    var selectIncludedFandomDialogVisible by remember { mutableStateOf(isPreview) }
     var selectExcludedFandomDialogVisible by remember { mutableStateOf(false) }
 
     Column(
@@ -750,10 +936,7 @@ private fun FandomsSelector(
                         subtitle = fandom.description,
                         expanded = chipExpanded,
                         onRemove = {
-                            component.selectFandom(
-                                select = false,
-                                fandom = fandom
-                            )
+                            onIntent(SearchFandomsComponent.Intent.SelectFandom(false, fandom))
                         },
                         onClick = {
                             chipExpanded = !chipExpanded
@@ -786,10 +969,7 @@ private fun FandomsSelector(
                         subtitle = fandom.description,
                         expanded = chipExpanded,
                         onRemove = {
-                            component.excludeFandom(
-                                exclude = false,
-                                fandom = fandom
-                            )
+                            onIntent(SearchFandomsComponent.Intent.ExcludeFandom(false, fandom))
                         },
                         onClick = {
                             chipExpanded = !chipExpanded
@@ -806,29 +986,25 @@ private fun FandomsSelector(
 
     if (selectIncludedFandomDialogVisible) {
         FindFandomDialog(
-            component = component,
+            state = state,
+            onIntent = onIntent,
             onDismiss = {
                 selectIncludedFandomDialogVisible = false
             },
             onSelected = { fandom ->
-                component.selectFandom(
-                    select = true,
-                    fandom = fandom
-                )
+                onIntent(SearchFandomsComponent.Intent.SelectFandom(true, fandom))
             }
         )
     }
     if (selectExcludedFandomDialogVisible) {
         FindFandomDialog(
-            component = component,
+            state = state,
+            onIntent = onIntent,
             onDismiss = {
                 selectExcludedFandomDialogVisible = false
             },
             onSelected = { fandom ->
-                component.excludeFandom(
-                    exclude = true,
-                    fandom = fandom
-                )
+                onIntent(SearchFandomsComponent.Intent.ExcludeFandom(true, fandom))
             }
         )
     }
@@ -836,9 +1012,11 @@ private fun FandomsSelector(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PairingSelector(component: SearchPairingsComponent) {
-    val state by component.state.subscribeAsState()
-
+private fun PairingSelector(
+    state: SearchPairingsComponent.State,
+    defaultModifiers: Array<String>,
+    onIntent: (SearchPairingsComponent.Intent) -> Unit,
+) {
     var selectCharacterDialogVisible by remember { mutableStateOf(false) }
     Column(
         verticalArrangement = Arrangement.spacedBy(spaceBetweenItems)
@@ -860,12 +1038,9 @@ private fun PairingSelector(component: SearchPairingsComponent) {
                     state.buildedPairing?.characters?.forEach { character ->
                         CharacterItem(
                             character = character,
-                            defaultModifiers = component.defaultCharacterModifiers,
+                            defaultModifiers = defaultModifiers,
                             onModifierChange = { modifier ->
-                                component.changeCharacterModifier(
-                                    character = character,
-                                    modifier = modifier
-                                )
+                                onIntent(SearchPairingsComponent.Intent.ChangeCharacterModifier(character, modifier))
                             }
                         )
                     }
@@ -907,7 +1082,7 @@ private fun PairingSelector(component: SearchPairingsComponent) {
                     Row {
                         Spacer(modifier = Modifier.width(6.dp))
                         Button(
-                            onClick = component::clearBuildedPairing,
+                            onClick = { onIntent(SearchPairingsComponent.Intent.ClearBuiltPairing) },
                             shape = MaterialTheme.shapes.small,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.surface,
@@ -947,10 +1122,7 @@ private fun PairingSelector(component: SearchPairingsComponent) {
                         Button(
                             onClick = {
                                 state.buildedPairing?.let {
-                                    component.selectPairing(
-                                        select = true,
-                                        pairing = it
-                                    )
+                                    onIntent(SearchPairingsComponent.Intent.SelectPairing(true, it))
                                 }
                             },
                             shape = MaterialTheme.shapes.small,
@@ -975,10 +1147,7 @@ private fun PairingSelector(component: SearchPairingsComponent) {
                         Button(
                             onClick = {
                                 state.buildedPairing?.let {
-                                    component.excludePairing(
-                                        exclude = true,
-                                        pairing = it
-                                    )
+                                    onIntent(SearchPairingsComponent.Intent.ExcludePairing(true, it))
                                 }
                             },
                             shape = MaterialTheme.shapes.small,
@@ -1037,10 +1206,7 @@ private fun PairingSelector(component: SearchPairingsComponent) {
                             expanded = false,
                             maxLines = Int.MAX_VALUE,
                             onRemove = {
-                                component.selectPairing(
-                                    select = false,
-                                    pairing = pairing
-                                )
+                                onIntent(SearchPairingsComponent.Intent.SelectPairing(false, pairing))
                             },
                             onClick = {}
                         )
@@ -1082,10 +1248,7 @@ private fun PairingSelector(component: SearchPairingsComponent) {
                             expanded = false,
                             maxLines = Int.MAX_VALUE,
                             onRemove = {
-                                component.excludePairing(
-                                    exclude = false,
-                                    pairing = pairing
-                                )
+                                onIntent(SearchPairingsComponent.Intent.ExcludePairing(false, pairing))
                             },
                             onClick = {}
                         )
@@ -1099,7 +1262,9 @@ private fun PairingSelector(component: SearchPairingsComponent) {
     }
     if (selectCharacterDialogVisible) {
         SelectCharacterDialog(
-            component = component,
+            state = state,
+            defaultModifiers = defaultModifiers,
+            onIntent = onIntent,
             onDismiss = { selectCharacterDialogVisible = false }
         )
     }
@@ -1108,10 +1273,9 @@ private fun PairingSelector(component: SearchPairingsComponent) {
 
 @Composable
 private fun TagsSelector(
-    component: SearchTagsComponent,
+    state: SearchTagsComponent.State,
+    onIntent: (SearchTagsComponent.Intent) -> Unit,
 ) {
-    val state by component.state.subscribeAsState()
-
     var chipExpanded by rememberSaveable { mutableStateOf(false) }
 
     var selectIncludedTagDialogVisible by remember { mutableStateOf(false) }
@@ -1147,10 +1311,7 @@ private fun TagsSelector(
                         subtitle = tag.description,
                         expanded = chipExpanded,
                         onRemove = {
-                            component.selectTag(
-                                select = false,
-                                tag = tag
-                            )
+                            onIntent(SearchTagsComponent.Intent.SelectTag(false, tag))
                         },
                         onClick = {
                             chipExpanded = !chipExpanded
@@ -1184,10 +1345,7 @@ private fun TagsSelector(
                         subtitle = tag.description,
                         expanded = chipExpanded,
                         onRemove = {
-                            component.excludeTag(
-                                exclude = false,
-                                tag = tag
-                            )
+                            onIntent(SearchTagsComponent.Intent.ExcludeTag(false, tag))
                         },
                         onClick = {
                             chipExpanded = !chipExpanded
@@ -1203,42 +1361,38 @@ private fun TagsSelector(
             selected = state.behavior == SearchParams.TAGS_ANY_SELECTED,
             title = stringResource(Res.string.search_action_tagsBehavior_any),
             onClick = {
-                component.changeSearchBehavior(SearchParams.TAGS_ANY_SELECTED)
+                onIntent(SearchTagsComponent.Intent.ChangeSearchBehavior(SearchParams.TAGS_ANY_SELECTED))
             }
         )
         RadioButtonWithTitle(
             selected = state.behavior == SearchParams.TAGS_ALL_SELECTED,
             title = stringResource(Res.string.search_action_tagsBehavior_all),
             onClick = {
-                component.changeSearchBehavior(SearchParams.TAGS_ALL_SELECTED)
+                onIntent(SearchTagsComponent.Intent.ChangeSearchBehavior(SearchParams.TAGS_ALL_SELECTED))
             }
         )
     }
     if (selectIncludedTagDialogVisible) {
         FindTagDialog(
-            component = component,
+            state = state,
+            onIntent = onIntent,
             onDismiss = {
                 selectIncludedTagDialogVisible = false
             },
             onSelected = { tag ->
-                component.selectTag(
-                    select = true,
-                    tag = tag
-                )
+                onIntent(SearchTagsComponent.Intent.SelectTag(true, tag))
             }
         )
     }
     if (selectExcludedTagDialogVisible) {
         FindTagDialog(
-            component = component,
+            state = state,
+            onIntent = onIntent,
             onDismiss = {
                 selectExcludedTagDialogVisible = false
             },
             onSelected = { tag ->
-                component.excludeTag(
-                    exclude = true,
-                    tag = tag
-                )
+                onIntent(SearchTagsComponent.Intent.ExcludeTag(true, tag))
             }
         )
     }
@@ -1794,12 +1948,22 @@ fun RangeSelector(
 
 
 @Composable
-private fun FindFandomDialog(
+internal fun FindFandomDialog(
     component: SearchFandomsComponent,
     onDismiss: () -> Unit,
     onSelected: (SearchedFandomModel) -> Unit,
 ) {
     val state by component.state.subscribeAsState()
+    FindFandomDialog(state, component::sendIntent, onDismiss, onSelected)
+}
+
+@Composable
+internal fun FindFandomDialog(
+    state: SearchFandomsComponent.State,
+    onIntent: (SearchFandomsComponent.Intent) -> Unit,
+    onDismiss: () -> Unit,
+    onSelected: (SearchedFandomModel) -> Unit,
+) {
     DialogPlatform(
         onDismissRequest = onDismiss,
         modifier = Modifier.fillMaxHeight(0.6F)
@@ -1810,13 +1974,13 @@ private fun FindFandomDialog(
             ) {
                 OutlinedTextField(
                     value = state.searchedName,
-                    onValueChange = component::changeSearchedName,
+                    onValueChange = { onIntent(SearchFandomsComponent.Intent.ChangeSearchedName(it)) },
                     label = {
                         Text(text = stringResource(Res.string.search_by_name))
                     },
                     trailingIcon = {
                         IconButton(
-                            onClick = component::clear
+                            onClick = { onIntent(SearchFandomsComponent.Intent.Clear) }
                         ) {
                             Icon(
                                 painter = painterResource(Res.drawable.ic_cancel),
@@ -1860,12 +2024,22 @@ private fun FindFandomDialog(
 
 
 @Composable
-private fun FindTagDialog(
+internal fun FindTagDialog(
     component: SearchTagsComponent,
     onDismiss: () -> Unit,
     onSelected: (SearchedTagModel) -> Unit,
 ) {
     val state by component.state.subscribeAsState()
+    FindTagDialog(state, component::sendIntent, onDismiss, onSelected)
+}
+
+@Composable
+internal fun FindTagDialog(
+    state: SearchTagsComponent.State,
+    onIntent: (SearchTagsComponent.Intent) -> Unit,
+    onDismiss: () -> Unit,
+    onSelected: (SearchedTagModel) -> Unit,
+) {
     DialogPlatform(
         onDismissRequest = onDismiss,
         modifier = Modifier.fillMaxHeight(0.6F)
@@ -1876,13 +2050,13 @@ private fun FindTagDialog(
             ) {
                 OutlinedTextField(
                     value = state.searchedName,
-                    onValueChange = component::changeSearchedName,
+                    onValueChange = { onIntent(SearchTagsComponent.Intent.ChangeSearchedName(it)) },
                     label = {
                         Text(text = stringResource(Res.string.search_by_name))
                     },
                     trailingIcon = {
                         IconButton(
-                            onClick = component::clear
+                            onClick = { onIntent(SearchTagsComponent.Intent.Clear) }
                         ) {
                             Icon(
                                 painter = painterResource(Res.drawable.ic_cancel),
@@ -1931,6 +2105,16 @@ fun SelectCharacterDialog(
     onDismiss: () -> Unit,
 ) {
     val state by component.state.subscribeAsState()
+    SelectCharacterDialog(state, component.defaultCharacterModifiers, component::sendIntent, onDismiss)
+}
+
+@Composable
+internal fun SelectCharacterDialog(
+    state: SearchPairingsComponent.State,
+    defaultModifiers: Array<String>,
+    onIntent: (SearchPairingsComponent.Intent) -> Unit,
+    onDismiss: () -> Unit,
+) {
     var searchedName by remember { mutableStateOf("") }
 
     val filteredList = remember(searchedName) {
@@ -2019,7 +2203,7 @@ fun SelectCharacterDialog(
                             SearchedCharacterItem(
                                 character = character,
                                 onClick = {
-                                    component.addCharacterToPairing(character)
+                                    onIntent(SearchPairingsComponent.Intent.AddCharacterToPairing(character))
                                     onDismiss()
                                 }
                             )
@@ -2415,7 +2599,7 @@ private fun CheckboxWithTitle(
 
 @Composable
 private fun BottomButtonContent(
-    component: SearchSaveComponent,
+    onSavedIntent: (SearchSaveComponent.Intent) -> Unit,
     onSearchClick: () -> Unit,
 ) {
     var saveMenuExpanded by rememberSaveable { mutableStateOf(false) }
@@ -2463,7 +2647,7 @@ private fun BottomButtonContent(
         Button(
             onClick = {
                 if (saveMenuExpanded) {
-                    component.save(name, description)
+                    onSavedIntent(SearchSaveComponent.Intent.Save(name, description))
                     saveMenuExpanded = false
                 } else {
                     onSearchClick()

@@ -7,11 +7,15 @@ import ru.blays.ficbook.reader.shared.data.SearchedTagModel
 interface SearchTagsComponent {
     val state: Value<State>
 
-    fun selectTag(select: Boolean, tag: SearchedTagModel)
-    fun excludeTag(exclude: Boolean, tag: SearchedTagModel)
-    fun changeSearchedName(name: String)
-    fun changeSearchBehavior(behavior: Int)
-    fun clear()
+    fun sendIntent(intent: Intent)
+
+    sealed class Intent {
+        data class SelectTag(val select: Boolean, val tag: SearchedTagModel) : Intent()
+        data class ExcludeTag(val exclude: Boolean, val tag: SearchedTagModel) : Intent()
+        data class ChangeSearchedName(val name: String) : Intent()
+        data class ChangeSearchBehavior(val behavior: Int) : Intent()
+        data object Clear : Intent()
+    }
 
     @Serializable
     data class State(

@@ -33,7 +33,16 @@ class DefaultSearchSaveComponent(
 
     override val state get() = _state
 
-    override fun save(
+    override fun sendIntent(intent: SearchSaveComponent.Intent) {
+        when (intent) {
+            is SearchSaveComponent.Intent.Save -> handleSave(intent.name, intent.description)
+            is SearchSaveComponent.Intent.Delete -> handleDelete(intent.shortcut)
+            is SearchSaveComponent.Intent.Select -> handleSelect(intent.shortcut)
+            is SearchSaveComponent.Intent.Update -> handleUpdate(intent.shortcut, intent.newName, intent.newDescription, intent.updateParams)
+        }
+    }
+
+    private fun handleSave(
         name: String,
         description: String
     ) {
@@ -52,7 +61,7 @@ class DefaultSearchSaveComponent(
         }
     }
 
-    override fun delete(shortcut: SearchParamsEntityShortcut) {
+    private fun handleDelete(shortcut: SearchParamsEntityShortcut) {
         coroutineScope.launch {
             val objectId = try {
                 ObjectId(shortcut.idHex)
@@ -82,7 +91,7 @@ class DefaultSearchSaveComponent(
         }
     }
 
-    override fun select(shortcut: SearchParamsEntityShortcut) {
+    private fun handleSelect(shortcut: SearchParamsEntityShortcut) {
         val objectId = try {
             ObjectId(shortcut.idHex)
         } catch (_: Exception) {
@@ -97,7 +106,7 @@ class DefaultSearchSaveComponent(
         entity?.let(onSelect)
     }
 
-    override fun update(
+    private fun handleUpdate(
         shortcut: SearchParamsEntityShortcut,
         newName: String,
         newDescription: String,

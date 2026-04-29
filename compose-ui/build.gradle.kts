@@ -79,6 +79,7 @@ kotlin {
                 implementation(libs.androidx.activity.activityCompose)
 
                 implementation(libs.compose.color.picker.android)
+                implementation(compose.uiTooling)
             }
         }
     }

@@ -55,6 +55,27 @@ fun FanficsListContent(
     modifier: Modifier = Modifier
 ) {
     val state by component.state.subscribeAsState()
+    FanficsListContent(
+        state = state,
+        onIntent = component::sendIntent,
+        onOutput = component::onOutput,
+        quickActionsFactory = component::getQuickActionsComponent,
+        lazyListState = lazyListState,
+        contentPadding = contentPadding,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun FanficsListContent(
+    state: FanficsListComponent.State,
+    onIntent: (FanficsListComponent.Intent) -> Unit,
+    onOutput: (FanficsListComponent.Output) -> Unit,
+    quickActionsFactory: (fanficID: String, fanficName: String) -> FanficQuickActionsComponent,
+    lazyListState: LazyListState = rememberLazyListState(),
+    contentPadding: PaddingValues? = null,
+    modifier: Modifier = Modifier
+) {
     val list = state.list
     val isLoading = state.isLoading
 
@@ -68,7 +89,7 @@ fun FanficsListContent(
 
     LaunchedEffect(canScrollForward) {
         if(!canScrollForward && canScrollBackward) {
-            component.sendIntent(FanficsListComponent.Intent.LoadNextPage)
+            onIntent(FanficsListComponent.Intent.LoadNextPage)
         }
     }
 
@@ -76,9 +97,7 @@ fun FanficsListContent(
         state = pullRefreshState,
         isRefreshing = isLoading,
         onRefresh = {
-            component.sendIntent(
-                FanficsListComponent.Intent.Refresh
-            )
+            onIntent(FanficsListComponent.Intent.Refresh)
         },
         indicator = {
             PullToRefreshDefaults.Indicator(
@@ -106,10 +125,7 @@ fun FanficsListContent(
                 FanficQuickActions(
                     contextMenuState = contextMenuState,
                     componentFactory = {
-                        component.getQuickActionsComponent(
-                            fanficID = fanfic.id,
-                            fanficName = fanfic.title
-                        )
+                        quickActionsFactory(fanfic.id, fanfic.title)
                     }
                 )
 
@@ -117,15 +133,13 @@ fun FanficsListContent(
                     modifier = Modifier.contextMenuAnchor(contextMenuState),
                     fanfic = fanfic,
                     onClick = {
-                        component.onOutput(
-                            FanficsListComponent.Output.OpenFanfic(fanfic.href)
-                        )
+                        onOutput(FanficsListComponent.Output.OpenFanfic(fanfic.href))
                     },
                     onLongClick = {
                         contextMenuState.show()
                     },
                     onPairingClick = { pairing ->
-                        component.onOutput(
+                        onOutput(
                             FanficsListComponent.Output.OpenAnotherSection(
                                 section = SectionWithQuery(
                                     name = pairing.character,
@@ -135,7 +149,7 @@ fun FanficsListContent(
                         )
                     },
                     onFandomClick = { fandom ->
-                        component.onOutput(
+                        onOutput(
                             FanficsListComponent.Output.OpenAnotherSection(
                                 section = SectionWithQuery(
                                     name = fandom.name,
@@ -145,16 +159,10 @@ fun FanficsListContent(
                         )
                     },
                     onAuthorClick = { author ->
-                        component.onOutput(
-                            FanficsListComponent.Output.OpenAuthor(
-                                href = author.href
-                            )
-                        )
+                        onOutput(FanficsListComponent.Output.OpenAuthor(href = author.href))
                     },
                     onUrlClicked = { url ->
-                        component.onOutput(
-                            FanficsListComponent.Output.OpenUrl(url)
-                        )
+                        onOutput(FanficsListComponent.Output.OpenUrl(url))
                     }
                 )
                 Spacer(modifier = Modifier.height(7.dp))

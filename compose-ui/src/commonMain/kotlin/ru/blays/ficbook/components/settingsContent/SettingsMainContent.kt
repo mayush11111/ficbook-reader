@@ -40,6 +40,39 @@ import ru.hh.toolbar.custom_toolbar.CollapsingToolbar
 
 @Composable
 fun SettingsMainContent(component: SettingsMainComponent) {
+    SettingsMainContent(
+        themeSetting = component.themeSetting,
+        amoledSetting = component.amoledSetting,
+        dynamicColorsSetting = component.dynamicColorsSetting,
+        accentIndexSetting = component.accentIndexSetting,
+        glassEffectEnabled = component.glassEffectEnabled,
+        blurAlpha = component.blurAlpha,
+        blurRadius = component.blurRadius,
+        blurNoiseFactor = component.blurNoiseFactor,
+        bypassBlock = component.bypassBlock,
+        autoVoteSetting = component.autoVoteSetting,
+        chromeCustomTabsSetting = component.chromeCustomTabsSetting,
+        typografSetting = component.typografSetting,
+        onOutput = component::onOutput,
+    )
+}
+
+@Composable
+internal fun SettingsMainContent(
+    themeSetting: SettingsUnitComponent<Int>,
+    amoledSetting: SettingsUnitComponent<Boolean>,
+    dynamicColorsSetting: SettingsUnitComponent<Boolean>?,
+    accentIndexSetting: SettingsUnitComponent<Int>,
+    glassEffectEnabled: SettingsUnitComponent<Boolean>,
+    blurAlpha: SettingsUnitComponent<Float>,
+    blurRadius: SettingsUnitComponent<Float>,
+    blurNoiseFactor: SettingsUnitComponent<Float>,
+    bypassBlock: SettingsUnitComponent<Boolean>,
+    autoVoteSetting: SettingsUnitComponent<Boolean>,
+    chromeCustomTabsSetting: SettingsUnitComponent<Boolean>?,
+    typografSetting: SettingsUnitComponent<Boolean>,
+    onOutput: (SettingsMainComponent.Output) -> Unit,
+) {
     val windowSize = WindowSize()
     val widthFill = if(scaleContent) {
         when (windowSize.width) {
@@ -59,11 +92,7 @@ fun SettingsMainContent(component: SettingsMainComponent) {
             CollapsingToolbar(
                 navigationIcon = {
                     IconButton(
-                        onClick = {
-                            component.onOutput(
-                                SettingsMainComponent.Output.NavigateBack
-                            )
-                        }
+                        onClick = { onOutput(SettingsMainComponent.Output.NavigateBack) }
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.ic_arrow_back),
@@ -104,37 +133,29 @@ fun SettingsMainContent(component: SettingsMainComponent) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 itemWithHeader(themeGroupTitle) {
-                    ThemeSetting(component.themeSetting)
-                    if(component.dynamicColorsSetting != null) {
-                        DynamicColorsSetting(component.dynamicColorsSetting!!)
+                    ThemeSetting(themeSetting)
+                    if(dynamicColorsSetting != null) {
+                        DynamicColorsSetting(dynamicColorsSetting)
                     }
-                    AmoledThemeSetting(component.amoledSetting)
-                    AccentColorSetting(component.accentIndexSetting)
+                    AmoledThemeSetting(amoledSetting)
+                    AccentColorSetting(accentIndexSetting)
                     if(blurSupported) {
                         BlurSetting(
-                            enabledComponent = component.glassEffectEnabled,
-                            alphaComponent = component.blurAlpha,
-                            radiusComponent = component.blurRadius,
-                            noiseFactorComponent = component.blurNoiseFactor
+                            enabledComponent = glassEffectEnabled,
+                            alphaComponent = blurAlpha,
+                            radiusComponent = blurRadius,
+                            noiseFactorComponent = blurNoiseFactor
                         )
                     }
                 }
                 itemWithHeader(commonGroupTitle) {
-                    ProxySettings {
-                        component.onOutput(
-                            SettingsMainComponent.Output.ProxySettings
-                        )
-                    }
-                    SuperfilterSetting {
-                        component.onOutput(
-                            SettingsMainComponent.Output.Superfilter
-                        )
-                    }
-                    BypassBlockSetting(component.bypassBlock)
-                    AutoVoteSetting(component.autoVoteSetting)
-                    TypografSetting(component.typografSetting)
-                    if(component.chromeCustomTabsSetting != null) {
-                        CustomTabsSetting(component.chromeCustomTabsSetting!!)
+                    ProxySettings { onOutput(SettingsMainComponent.Output.ProxySettings) }
+                    SuperfilterSetting { onOutput(SettingsMainComponent.Output.Superfilter) }
+                    BypassBlockSetting(bypassBlock)
+                    AutoVoteSetting(autoVoteSetting)
+                    TypografSetting(typografSetting)
+                    if(chromeCustomTabsSetting != null) {
+                        CustomTabsSetting(chromeCustomTabsSetting)
                     }
                 }
             }

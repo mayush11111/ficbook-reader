@@ -36,7 +36,19 @@ import java.net.Proxy
 @Composable
 fun SettingsProxyContent(component: SettingsProxyComponent) {
     val state by component.state.collectAsState()
+    SettingsProxyContent(
+        state = state,
+        onIntent = component::sendIntent,
+        onOutput = component::onOutput
+    )
+}
 
+@Composable
+internal fun SettingsProxyContent(
+    state: SettingsProxyComponent.State,
+    onIntent: (SettingsProxyComponent.Intent) -> Unit,
+    onOutput: (SettingsProxyComponent.Output) -> Unit
+) {
     val windowSize = WindowSize()
     val widthFill = if(scaleContent) {
         when (windowSize.width) {
@@ -59,9 +71,7 @@ fun SettingsProxyContent(component: SettingsProxyComponent) {
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            component.onOutput(
-                                SettingsProxyComponent.Output.NavigateBack
-                            )
+                            onOutput(SettingsProxyComponent.Output.NavigateBack)
                         }
                     ) {
                         Icon(
@@ -100,9 +110,7 @@ fun SettingsProxyContent(component: SettingsProxyComponent) {
                     shape = MaterialTheme.shapes.extraLarge,
                     color = MaterialTheme.colorScheme.primaryContainer,
                     onClick = {
-                        component.sendIntent(
-                            SettingsProxyComponent.Intent.ChangeProxyEnabled(!state.enabled)
-                        )
+                        onIntent(SettingsProxyComponent.Intent.ChangeProxyEnabled(!state.enabled))
                     }
                 ) {
                     Row(
@@ -114,7 +122,7 @@ fun SettingsProxyContent(component: SettingsProxyComponent) {
                         Text(
                             modifier = Modifier.weight(1F),
                             text = stringResource(Res.string.proxy_enabled),
-                            color = MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.surface,
                             fontWeight = FontWeight.W500,
                             fontSize = 20.sp
                         )
@@ -130,9 +138,7 @@ fun SettingsProxyContent(component: SettingsProxyComponent) {
                     checkedIndex = checkedIndex,
                     index = 0
                 ) {
-                    component.sendIntent(
-                        SettingsProxyComponent.Intent.SetDefaultProxy
-                    )
+                    onIntent(SettingsProxyComponent.Intent.SetDefaultProxy)
                     useCustomProxy = false
                 }
                 SettingsRadioButtonWithTitle(
@@ -149,7 +155,7 @@ fun SettingsProxyContent(component: SettingsProxyComponent) {
                     CustomProxyContent(
                         initialConfig = state.customProxyConfig,
                         onSave = { host, port, type, username, password ->
-                            component.sendIntent(
+                            onIntent(
                                 SettingsProxyComponent.Intent.SetCustomProxy(
                                     host = host,
                                     port = port,

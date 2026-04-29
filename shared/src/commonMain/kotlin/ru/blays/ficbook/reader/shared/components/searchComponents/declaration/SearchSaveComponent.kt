@@ -6,21 +6,14 @@ import ru.blays.ficbook.reader.shared.data.SearchParamsEntityShortcut
 interface SearchSaveComponent {
     val state: Value<State>
 
-    fun save(
-        name: String,
-        description: String
-    )
+    fun sendIntent(intent: Intent)
 
-    fun delete(shortcut: SearchParamsEntityShortcut)
-
-    fun select(shortcut: SearchParamsEntityShortcut)
-
-    fun update(
-        shortcut: SearchParamsEntityShortcut,
-        newName: String,
-        newDescription: String,
-        updateParams: Boolean
-    )
+    sealed class Intent {
+        data class Save(val name: String, val description: String) : Intent()
+        data class Delete(val shortcut: SearchParamsEntityShortcut) : Intent()
+        data class Select(val shortcut: SearchParamsEntityShortcut) : Intent()
+        data class Update(val shortcut: SearchParamsEntityShortcut, val newName: String, val newDescription: String, val updateParams: Boolean) : Intent()
+    }
 
     data class State(
         val saved: List<SearchParamsEntityShortcut>

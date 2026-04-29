@@ -37,7 +37,16 @@ class DefaultSearchFandomsComponent(
 
     override val state: Value<SearchFandomsComponent.State> get() = _state
 
-    override fun selectFandom(select: Boolean, fandom: SearchedFandomModel) {
+    override fun sendIntent(intent: SearchFandomsComponent.Intent) {
+        when (intent) {
+            is SearchFandomsComponent.Intent.SelectFandom -> handleSelectFandom(intent.select, intent.fandom)
+            is SearchFandomsComponent.Intent.ExcludeFandom -> handleExcludeFandom(intent.exclude, intent.fandom)
+            is SearchFandomsComponent.Intent.ChangeSearchedName -> search(intent.name)
+            SearchFandomsComponent.Intent.Clear -> handleClear()
+        }
+    }
+
+    private fun handleSelectFandom(select: Boolean, fandom: SearchedFandomModel) {
         if(select) {
             _state.update {
                 it.copy(
@@ -53,7 +62,7 @@ class DefaultSearchFandomsComponent(
         }
     }
 
-    override fun excludeFandom(exclude: Boolean, fandom: SearchedFandomModel) {
+    private fun handleExcludeFandom(exclude: Boolean, fandom: SearchedFandomModel) {
         if(exclude) {
             _state.update {
                 it.copy(
@@ -69,9 +78,7 @@ class DefaultSearchFandomsComponent(
         }
     }
 
-    override fun changeSearchedName(name: String) = search(name)
-
-    override fun clear() {
+    private fun handleClear() {
         _state.update {
             it.copy(
                 searchedName = "",

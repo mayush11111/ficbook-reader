@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
@@ -22,6 +23,7 @@ import ficbook_reader.compose_ui.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import ru.blays.ficbook.reader.shared.components.profileComponents.declaration.UserProfileComponent
+import ru.blays.ficbook.reader.shared.data.dto.SavedUserModel
 import ru.blays.ficbook.ui_components.CustomShape.SquircleShape.CornerSmoothing
 import ru.blays.ficbook.ui_components.CustomShape.SquircleShape.SquircleShape
 import ru.blays.ficbook.ui_components.spacers.HorizontalSpacer
@@ -33,6 +35,20 @@ import ru.hh.toolbar.custom_toolbar.CollapsingToolbar
 @Composable
 fun UserProfileContent(component: UserProfileComponent) {
     val state by component.state.collectAsState()
+    UserProfileContent(
+        state = state,
+        onIntent = component::sendIntent,
+        onOutput = component::onOutput
+    )
+}
+
+@Composable
+internal fun UserProfileContent(
+    state: SavedUserModel?,
+    onIntent: (UserProfileComponent.Intent) -> Unit,
+    onOutput: (UserProfileComponent.Output) -> Unit
+) {
+    val isPreview = LocalInspectionMode.current
 
     Scaffold(
         topBar = {
@@ -40,9 +56,7 @@ fun UserProfileContent(component: UserProfileComponent) {
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            component.onOutput(
-                                UserProfileComponent.Output.NavigateBack
-                            )
+                            onOutput(UserProfileComponent.Output.NavigateBack)
                         }
                     ) {
                         Icon(
@@ -146,6 +160,14 @@ fun UserProfileContent(component: UserProfileComponent) {
                 constraintSet = constraintsSet,
                 animateChanges = true,
             ) {
+                if (isPreview) {
+                    Box(
+                        modifier = Modifier
+                            .clip(SquircleShape(cornerSmoothing = CornerSmoothing.High))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .layoutId(LayoutIds.Avatar)
+                    )
+                } else {
                 SubcomposeAsyncImage(
                     model = state?.avatarPath,
                     contentDescription = stringResource(Res.string.content_description_icon_author_avatar),
@@ -160,9 +182,7 @@ fun UserProfileContent(component: UserProfileComponent) {
                                     color = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)
                                 )
                                 .clickable {
-                                    component.onOutput(
-                                        UserProfileComponent.Output.OpenProfile()
-                                    )
+                                    onOutput(UserProfileComponent.Output.OpenProfile())
                                 }
                         )
                     },
@@ -178,6 +198,7 @@ fun UserProfileContent(component: UserProfileComponent) {
                         .clip(SquircleShape(cornerSmoothing = CornerSmoothing.High))
                         .layoutId(LayoutIds.Avatar)
                 )
+                }
                 Text(
                     modifier = Modifier.layoutId(LayoutIds.Name),
                     text = state?.name ?: stringResource(Res.string.anonymous_user),
@@ -198,9 +219,7 @@ fun UserProfileContent(component: UserProfileComponent) {
                 Button(
                     shape = MaterialTheme.shapes.medium,
                     onClick = {
-                        component.onOutput(
-                            UserProfileComponent.Output.ManageAccounts
-                        )
+                        onOutput(UserProfileComponent.Output.ManageAccounts)
                     },
                     modifier = Modifier
                         .padding(horizontal = DefaultPadding.CardHorizontalPadding)
@@ -221,9 +240,7 @@ fun UserProfileContent(component: UserProfileComponent) {
                 OutlinedButton(
                     shape = MaterialTheme.shapes.medium,
                     onClick = {
-                        component.sendIntent(
-                            UserProfileComponent.Intent.EnableIncognito
-                        )
+                        onIntent(UserProfileComponent.Intent.EnableIncognito)
                     },
                     modifier = Modifier
                         .padding(horizontal = DefaultPadding.CardHorizontalPadding)

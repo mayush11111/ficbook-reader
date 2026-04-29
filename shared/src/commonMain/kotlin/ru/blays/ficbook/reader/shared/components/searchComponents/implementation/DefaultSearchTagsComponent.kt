@@ -38,8 +38,17 @@ class DefaultSearchTagsComponent(
 
     override val state get() = _state
 
+    override fun sendIntent(intent: SearchTagsComponent.Intent) {
+        when (intent) {
+            is SearchTagsComponent.Intent.SelectTag -> handleSelectTag(intent.select, intent.tag)
+            is SearchTagsComponent.Intent.ExcludeTag -> handleExcludeTag(intent.exclude, intent.tag)
+            is SearchTagsComponent.Intent.ChangeSearchedName -> search(intent.name)
+            is SearchTagsComponent.Intent.ChangeSearchBehavior -> handleChangeSearchBehavior(intent.behavior)
+            SearchTagsComponent.Intent.Clear -> handleClear()
+        }
+    }
 
-    override fun selectTag(
+    private fun handleSelectTag(
         select: Boolean,
         tag: SearchedTagModel
     ) {
@@ -58,7 +67,7 @@ class DefaultSearchTagsComponent(
         }
     }
 
-    override fun excludeTag(
+    private fun handleExcludeTag(
         exclude: Boolean,
         tag: SearchedTagModel
     ) {
@@ -77,15 +86,13 @@ class DefaultSearchTagsComponent(
         }
     }
 
-    override fun changeSearchedName(name: String) = search(name)
-
-    override fun changeSearchBehavior(behavior: Int) {
+    private fun handleChangeSearchBehavior(behavior: Int) {
         _state.update {
             it.copy(behavior = behavior)
         }
     }
 
-    override fun clear() {
+    private fun handleClear() {
         _state.update {
             it.copy(
                 searchedName = "",

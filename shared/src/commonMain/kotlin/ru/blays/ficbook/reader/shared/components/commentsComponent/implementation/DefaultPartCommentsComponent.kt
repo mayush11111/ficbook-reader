@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import ru.blays.ficbook.api.result.ApiResult
 import ru.blays.ficbook.reader.shared.components.commentsComponent.declaration.CommentsComponent
 import ru.blays.ficbook.reader.shared.components.commentsComponent.declaration.ExtendedCommentsComponent
+import ru.blays.ficbook.reader.shared.components.commentsComponent.declaration.WriteCommentComponent
 import ru.blays.ficbook.reader.shared.data.dto.CommentBlockModelStable
 import ru.blays.ficbook.reader.shared.data.dto.QuoteModelStable
 
@@ -100,7 +101,7 @@ class DefaultPartCommentsComponent(
                 text = ""
             )
         }
-        writeCommentComponent.addReply(newBlocks)
+        writeCommentComponent.sendIntent(WriteCommentComponent.Intent.AddReply(newBlocks))
     }
 
     init {

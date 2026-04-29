@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
@@ -164,6 +165,7 @@ private fun ProfileHeader(
         avatarSize.roundToPx()
     }
 
+    val isPreview = LocalInspectionMode.current
     SubcomposeLayout { constraints ->
         val headerImage = subcompose(
             slotId = ProfileHeaderSlots.HEADER_IMAGE
@@ -171,13 +173,21 @@ private fun ProfileHeader(
             Box(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                AsyncImage(
-                    model = mainInfo.profileCoverUrl,
-                    contentDescription = stringResource(Res.string.content_description_icon_profile_background),
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.TopCenter,
-                    modifier = Modifier.matchParentSize()
-                )
+                if (isPreview) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                    )
+                } else {
+                    AsyncImage(
+                        model = mainInfo.profileCoverUrl,
+                        contentDescription = stringResource(Res.string.content_description_icon_profile_background),
+                        contentScale = ContentScale.Crop,
+                        alignment = Alignment.TopCenter,
+                        modifier = Modifier.matchParentSize()
+                    )
+                }
                 CustomIconButton(
                     onClick = onBack,
                     shape = CircleShape,
@@ -208,14 +218,16 @@ private fun ProfileHeader(
                     .clip(CircleShape)
                     .padding(5.dp)
             ) {
-                AsyncImage(
-                    model = mainInfo.avatarUrl,
-                    contentDescription = stringResource(Res.string.content_description_icon_author_avatar),
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(CircleShape)
-                )
+                if (!isPreview) {
+                    AsyncImage(
+                        model = mainInfo.avatarUrl,
+                        contentDescription = stringResource(Res.string.content_description_icon_author_avatar),
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(CircleShape)
+                    )
+                }
             }
         }
         val info = subcompose(

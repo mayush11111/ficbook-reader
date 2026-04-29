@@ -40,14 +40,22 @@ class DefaultWriteCommentComponent(
 
     override val state get() = _state
 
-    override fun editText(newText: String) {
+    override fun sendIntent(intent: WriteCommentComponent.Intent) {
+        when (intent) {
+            is WriteCommentComponent.Intent.EditText -> handleEditText(intent.newText)
+            is WriteCommentComponent.Intent.AddReply -> handleAddReply(intent.blocks)
+            WriteCommentComponent.Intent.Post -> handlePost()
+        }
+    }
+
+    private fun handleEditText(newText: String) {
         _state.update {
             it.copy(text = newText)
         }
         updatePreview()
     }
 
-    override fun addReply(blocks: List<CommentBlockModelStable>) {
+    private fun handleAddReply(blocks: List<CommentBlockModelStable>) {
         coroutineScope.launch {
             val convertedBlocks = blocks.fold(StringBuilder()) { builder, block ->
                 val converted = commentsParser.blockToText(
@@ -67,7 +75,7 @@ class DefaultWriteCommentComponent(
         }
     }
 
-    override fun post() {
+    private fun handlePost() {
         coroutineScope.launch {
             val result = repository.postComment(
                 partID = partID,

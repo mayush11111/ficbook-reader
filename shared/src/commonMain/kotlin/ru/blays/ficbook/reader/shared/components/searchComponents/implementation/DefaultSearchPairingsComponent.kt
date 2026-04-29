@@ -43,7 +43,17 @@ class DefaultSearchPairingsComponent(
 
     override val defaultCharacterModifiers: Array<String> = getDefaultModifiers()
 
-    override fun selectPairing(select: Boolean, pairing: SearchedPairingModel) {
+    override fun sendIntent(intent: SearchPairingsComponent.Intent) {
+        when (intent) {
+            is SearchPairingsComponent.Intent.SelectPairing -> handleSelectPairing(intent.select, intent.pairing)
+            is SearchPairingsComponent.Intent.ExcludePairing -> handleExcludePairing(intent.exclude, intent.pairing)
+            is SearchPairingsComponent.Intent.AddCharacterToPairing -> handleAddCharacterToPairing(intent.character)
+            SearchPairingsComponent.Intent.ClearBuiltPairing -> handleClearBuiltPairing()
+            is SearchPairingsComponent.Intent.ChangeCharacterModifier -> handleChangeCharacterModifier(intent.character, intent.modifier)
+        }
+    }
+
+    private fun handleSelectPairing(select: Boolean, pairing: SearchedPairingModel) {
         if(select) {
             _state.update {
                 it.copy(
@@ -60,7 +70,7 @@ class DefaultSearchPairingsComponent(
         }
     }
 
-    override fun excludePairing(exclude: Boolean, pairing: SearchedPairingModel) {
+    private fun handleExcludePairing(exclude: Boolean, pairing: SearchedPairingModel) {
         if(exclude) {
             _state.update {
                 it.copy(
@@ -77,7 +87,7 @@ class DefaultSearchPairingsComponent(
         }
     }
 
-    override fun addCharacterToPairing(character: SearchedCharacterModel) {
+    private fun handleAddCharacterToPairing(character: SearchedCharacterModel) {
         _state.update {
             var buildedPairing = it.buildedPairing
             if(buildedPairing == null) {
@@ -103,13 +113,13 @@ class DefaultSearchPairingsComponent(
         }
     }
 
-    override fun clearBuildedPairing() {
+    private fun handleClearBuiltPairing() {
         _state.update {
             it.copy(buildedPairing = null)
         }
     }
 
-    override fun changeCharacterModifier(character: SearchedPairingModel.Character, modifier: String) {
+    private fun handleChangeCharacterModifier(character: SearchedPairingModel.Character, modifier: String) {
         if(character.modifier == modifier) return
         _state.update {
             val newCharacter = character.copy(
